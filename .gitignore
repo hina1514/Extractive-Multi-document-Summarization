@@ -218,3 +218,17 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+#Dataset
+Data/ViMs/
+
+# Môi trường ảo
+venv/
+.venv/
+
+# File dữ liệu
+*.csv
+*.parquet
+*.xlsx
+*.json
+*.zip
