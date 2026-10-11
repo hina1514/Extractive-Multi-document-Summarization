@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trực quan hóa tóm tắt đa văn bản</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-topbar">
+        <div>
+          <p class="eyebrow">Vietnamese multi-document summarization</p>
+          <h1>Trực quan hóa tóm tắt đa văn bản</h1>
+        </div>
+        <div class="topbar-badges">
+          <span>Local</span>
+          <span>KMeans</span>
+          <span>MMR</span>
+        </div>
+      </header>
+
+      <section class="workspace">
+        <aside class="input-pane" aria-label="Nguồn văn bản">
+          <div class="pane-header">
+            <div>
+              <p class="eyebrow">Input</p>
+              <h2>Nguồn dữ liệu</h2>
+            </div>
+            <button class="icon-button" id="addTextBtn" type="button" title="Thêm văn bản">+</button>
+          </div>
+
+          <div id="textInputs" class="text-inputs">
+            <article class="text-box">
+              <div class="text-box-header">
+                <span>Văn bản 1</span>
+              </div>
+              <textarea name="texts">Content:
+Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ Paris đến Cairo, mang theo 66 người. Giới chức hàng không Ai Cập cho biết khả năng khủng bố đang được xem xét. Lực lượng tìm kiếm phát hiện một số mảnh vỡ trên Địa Trung Hải. Các chuyên gia cho rằng dữ liệu hộp đen sẽ rất quan trọng để xác định nguyên nhân vụ việc.</textarea>
+            </article>
+          </div>
+
+          <label class="file-picker">
+            <span class="file-icon">↑</span>
+            <span>Chọn file .txt, .docx, .pdf</span>
+            <input id="fileInput" type="file" name="files" multiple accept=".txt,.docx,.pdf">
+          </label>
+          <div id="fileList" class="file-list"></div>
+
+          <div class="controls">
+            <label>
+              <span>Số câu tóm tắt</span>
+              <input id="summaryLength" type="number" min="1" max="20" value="6">
+            </label>
+            <button id="runBtn" class="primary-button" type="button">Chạy</button>
+          </div>
+          <p id="status" class="status" aria-live="polite"></p>
+        </aside>
+
+        <section class="result-pane" aria-label="Kết quả trực quan">
+          <div class="result-header">
+            <nav class="step-tabs" aria-label="Các bước">
+              <button class="step-tab is-active" data-step="preprocess" type="button">
+                <span>1</span>
+                <strong>Tiền xử lý</strong>
+              </button>
+              <button class="step-tab" data-step="clusters" type="button" disabled>
+                <span>2</span>
+                <strong>KMeans</strong>
+              </button>
+              <button class="step-tab" data-step="mmr" type="button" disabled>
+                <span>3</span>
+                <strong>MMR</strong>
+              </button>
+              <button class="step-tab" data-step="summary" type="button" disabled>
+                <span>4</span>
+                <strong>Output</strong>
+              </button>
+            </nav>
+
+            <section class="stats-bar" id="statsBar">
+              <div><strong>0</strong><span>văn bản</span></div>
+              <div><strong>0</strong><span>câu</span></div>
+              <div><strong>0</strong><span>cụm</span></div>
+              <div><strong>0</strong><span>câu tóm tắt</span></div>
+            </section>
+          </div>
+
+          <section class="step-panel is-active" id="preprocessPanel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Step 1</p>
+                <h2>Câu và từ khóa</h2>
+              </div>
+              <button class="secondary-button next-step" data-next="clusters" type="button" disabled>KMeans</button>
+            </div>
+            <div id="preprocessView" class="empty-state">Chưa có dữ liệu.</div>
+          </section>
+
+          <section class="step-panel" id="clustersPanel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Step 2</p>
+                <h2>Cụm câu đại diện</h2>
+              </div>
+              <button class="secondary-button next-step" data-next="mmr" type="button" disabled>MMR</button>
+            </div>
+            <div id="clusterView" class="empty-state">Chưa có dữ liệu.</div>
+          </section>
+
+          <section class="step-panel" id="mmrPanel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Step 3</p>
+                <h2>Xếp hạng MMR</h2>
+              </div>
+              <button class="secondary-button next-step" data-next="summary" type="button" disabled>Output</button>
+            </div>
+            <div id="mmrView" class="empty-state">Chưa có dữ liệu.</div>
+          </section>
+
+          <section class="step-panel" id="summaryPanel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Step 4</p>
+                <h2>Bản tóm tắt và highlight</h2>
+              </div>
+              <button id="copyBtn" class="secondary-button" type="button" disabled>Copy</button>
+            </div>
+            <div id="summaryView" class="empty-state">Chưa có dữ liệu.</div>
+            <div id="sourceView" class="source-view"></div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>
