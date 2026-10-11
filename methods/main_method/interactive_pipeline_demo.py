@@ -665,6 +665,33 @@ button.primary,.flow-controls #flow-play,.km-graph-toolbar .km-graph-play,
 button.primary,.flow-controls #flow-play,.km-graph-toolbar .km-graph-play,
 .km-lesson-toolbar .km-primary{font-weight:800!important;}
 
+
+/* Bảng câu đại diện theo từng tâm K-means */
+.rep-cluster-panel{margin:16px 0;padding:15px;border:1px solid #DCD5F3;border-radius:12px;background:#fff}
+.rep-cluster-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.rep-cluster-head h3{margin:0;color:#30264A;font-size:17px}
+.rep-cluster-head p{margin:5px 0 0;color:#4C4564;font-size:13px;line-height:1.5}
+.rep-count{flex-shrink:0;padding:6px 9px;border:1px solid #DCD5F3;border-radius:8px;background:#F3F0FC;color:#493C77;font-size:12px;font-weight:750}
+.rep-chosen-summary{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;margin:10px 0;border:1px solid #B9DDCF;border-radius:9px;background:#F0F8F4;color:#203C34}
+.rep-chosen-summary .rep-star{display:grid;place-items:center;flex:0 0 28px;width:28px;height:28px;border-radius:7px;background:#D6EEE3;color:#17664F;font-size:19px}
+.rep-chosen-summary b{display:block;color:#174D3D;font-size:14px}
+.rep-chosen-summary p{margin:3px 0;color:#293F37;font-size:13px;line-height:1.5}
+.rep-chosen-summary small{color:#174D3D;font-size:12px;font-weight:750}
+.rep-cluster-panel table{min-width:760px;font-size:13px}
+.rep-cluster-panel th{color:#30264A;background:#F2EFFB;font-size:12px}
+.rep-cluster-panel td{color:#29243C}
+.rep-cluster-panel tr.rep-selected-row td{background:#E7F5EE!important;border-top:1px solid #9ACDB9;border-bottom:1px solid #9ACDB9;font-weight:650}
+.rep-cluster-panel tr.rep-member-row td{background:#FCFBFF}
+.rep-cluster-panel tr.rep-other-row td{color:#625D70}
+.rep-cluster-panel tr.rep-selected-row td:first-child{border-left:4px solid #4F9F82}
+.rep-cluster-panel .rep-cluster-tag,.rep-member-pill,.rep-outside-pill,.rep-selected-pill{display:inline-block;padding:4px 7px;border-radius:6px;font-size:11px;font-weight:750;white-space:nowrap}
+.rep-cluster-tag{background:#F0ECFA;border:1px solid #DCD2F2;color:#40345F}
+.rep-member-pill{background:#EAF5EF;border:1px solid #C8E5D7;color:#245B48}
+.rep-outside-pill{background:#F6F0E8;border:1px solid #EAD9C4;color:#78572E}
+.rep-selected-pill{background:#D4EEE2;border:1px solid #A6D4C1;color:#155B44}
+.rep-cluster-note{margin:9px 1px 0;color:#4B3F65;font-size:12px;line-height:1.55}
+@media(max-width:650px){.rep-cluster-panel{padding:10px}.rep-cluster-head{flex-direction:column}.rep-count{white-space:normal}}
+
 </style>
 
 </head>
@@ -694,14 +721,14 @@ button.primary,.flow-controls #flow-play,.km-graph-toolbar .km-graph-play,
 
 const SAMPLE=[
 
- // Tài liệu 1: chính sách, hướng dẫn người dân và phân loại tại hộ gia đình.
- 'Thành phố bắt đầu chương trình phân loại rác tại nguồn ở ba quận. Chương trình hướng dẫn hộ gia đình tách rác hữu cơ, giấy và nhựa. Thùng màu riêng giúp người dân bỏ rác đúng nơi quy định. Cán bộ môi trường phát tờ hướng dẫn cách phân loại rác cho từng khu dân cư. Các tổ dân phố tổ chức buổi tuyên truyền vào cuối tuần để giải đáp thắc mắc. Trường học hướng dẫn học sinh nhận biết vật liệu có thể tái chế và mang kiến thức về gia đình. Những hộ thực hiện tốt được ghi nhận trong cuộc họp khu phố hằng tháng. Thành phố mở đường dây tiếp nhận phản ánh khi điểm tập kết rác bị quá tải.',
+ // Tài liệu 1: hướng dẫn phân loại rác tại nguồn.
+ 'Thành phố triển khai chương trình phân loại rác tại nguồn ở ba quận. Hộ gia đình được hướng dẫn tách rác hữu cơ, giấy và nhựa. Thùng màu riêng giúp người dân bỏ rác đúng quy định. Trường học hướng dẫn học sinh nhận biết vật liệu có thể tái chế. Các tổ dân phố tiếp nhận phản ánh về những điểm tập kết rác quá tải.',
 
- // Tài liệu 2: thu gom, vận chuyển và xử lý vật liệu.
- 'Chương trình tổ chức xe thu gom riêng rác đã phân loại mỗi tuần. Xe thu gom chuyển rác tái chế đến nhà máy xử lý vật liệu. Nhà máy cân vật liệu thu hồi trước khi đưa vào tái chế. Lịch xe được thông báo trước để người dân chuẩn bị rác đúng ngày. Nhân viên thu gom kiểm tra nhanh các thùng và nhắc nhở khi rác bị trộn lẫn. Giấy và bìa carton được ép thành kiện để thuận tiện cho việc vận chuyển. Chai nhựa được phân loại theo loại vật liệu trước khi chuyển sang dây chuyền xử lý. Rác hữu cơ sạch được đưa đến khu ủ compost để tạo phân bón cho cây xanh. Nhà máy ghi lại khối lượng từng nhóm vật liệu sau mỗi ca làm việc.',
+ // Tài liệu 2: thu gom và xử lý vật liệu.
+ 'Xe chuyên dụng thu gom riêng rác đã phân loại mỗi tuần. Xe chuyển giấy và nhựa đến nhà máy để xử lý. Nhà máy cân và phân loại vật liệu thu hồi trước khi tái chế. Rác hữu cơ sạch được đưa đến khu ủ compost để tạo phân bón. Lịch thu gom được thông báo trước nhằm hạn chế tình trạng rác bị trộn lẫn.',
 
- // Tài liệu 3: kết quả thí điểm, tác động và theo dõi chất lượng.
- 'Thí điểm giúp giảm 18 phần trăm lượng rác đưa đi chôn lấp. Số hộ tham gia chương trình phân loại rác tăng sau các buổi hướng dẫn. Thành phố duy trì chương trình vì lượng vật liệu tái chế thu hồi tăng. Báo cáo tháng so sánh khối lượng rác trước và sau khi triển khai tại từng quận. Một số điểm tập kết ghi nhận lượng giấy và nhựa sạch tăng rõ rệt. Đội kiểm tra lấy mẫu để đánh giá tỷ lệ rác bị phân loại sai trong các thùng. Thành phố điều chỉnh lịch thu gom tại những khu vực có lượng rác phát sinh cao. Kết quả thí điểm được công bố tại cuộc họp với đại diện người dân. Chương trình tiếp tục đặt mục tiêu giảm rác chôn lấp trong năm tiếp theo.'
+ // Tài liệu 3: kết quả thí điểm và cải tiến chương trình.
+ 'Thí điểm giúp giảm lượng rác đưa đi chôn lấp. Số hộ tham gia tăng sau các buổi hướng dẫn. Báo cáo hằng tháng so sánh khối lượng rác trước và sau chương trình. Đội kiểm tra lấy mẫu để đánh giá tỷ lệ phân loại sai. Thành phố điều chỉnh lịch thu gom và tiếp tục mở rộng chương trình.'
 
 ];
 
@@ -1355,17 +1382,41 @@ function bindKmGraphControls(){
 function representativeSummaryStep(){
   const steps=DATA.representative_steps||[];
   if(!steps.length)return '<div class="note warn">Không có kết quả chọn câu đại diện.</div>';
-  const rows=steps.map(r=>{
-    const inCluster=Boolean(r.selected_in_cluster);
-    const status=inCluster?'<span class="pill">Thuộc cụm</span>':'<span class="small">Ngoài cụm theo kết quả pipeline</span>';
-    return '<tr><td><b>Cụm '+(Number(r.cluster)+1)+'</b></td><td><b>'+esc(r.selected_id)+'</b><br><span class="sentence">'+esc(r.selected_text||'')+'</span></td><td class="num">'+num(Number(r.selected_distance),9)+'</td><td>'+status+'</td></tr>';
-  }).join('');
+  const points=DATA.sentences||[];
   const inClusterCount=steps.filter(r=>Boolean(r.selected_in_cluster)).length;
-  return metrics([[steps.length,'câu đại diện'],[inClusterCount,'được gán đúng cụm']])+
-    '<section class="centroid-pipeline"><h3>Câu đại diện được chọn</h3><p class="small">Khoảng cách là Euclid thật trong vector Word2Vec 256 chiều. Chỉ hiển thị kết quả cuối, không duyệt từng câu trên biểu đồ.</p>'+rowTable(['Cụm','Câu đại diện','Khoảng cách thật 256D','Trạng thái'],rows)+'</section>'+
-    (inClusterCount<steps.length?'<div class="note warn">Một số câu đại diện được pipeline hiện tại chọn nằm ngoài cụm ghi bên cạnh. Bảng giữ nguyên kết quả thực tế, không tự sửa thuật toán.</div>':'');
+  const clusterTables=steps.map((r,order)=>{
+    // Each cluster table lists only sentences actually assigned to that cluster.
+    const allCandidates=r.candidates||[];
+    const candidates=allCandidates.filter(c=>Number(c.assigned_cluster)===Number(r.cluster)).slice().sort((a,b)=>
+      (Number(a.distance)-Number(b.distance)) || (Number(a.index)-Number(b.index)));
+    const rows=candidates.map((c,rank)=>{
+      const selected=Number(c.index)===Number(r.selected_index)||Boolean(c.is_representative);
+      const state=selected
+        ? '<span class="rep-selected-pill">★ CÂU ĐƯỢC CHỌN</span>'
+        : '<span class="rep-member-pill">Thuộc cụm</span>';
+      return '<tr class="'+(selected?'rep-selected-row':'rep-member-row')+'">'+
+        '<td class="num">'+(rank+1)+'</td>'+
+        '<td><b>'+esc(c.id)+'</b></td>'+
+        '<td class="sentence">'+esc(c.text||points[Number(c.index)]?.text||'')+'</td>'+
+        '<td class="num"><b>'+num(Number(c.distance),7)+'</b></td>'+
+        '<td>'+state+'</td></tr>';
+    });
+    const actualSelected=allCandidates.find(c=>Number(c.index)===Number(r.selected_index));
+    const note=r.selected_in_cluster
+      ? 'Câu được chọn thuộc cụm này và được đánh dấu ★ trong bảng.'
+      : 'Câu pipeline thực tế chọn là '+esc(r.selected_id)+' (được gán vào cụm '+(Number(actualSelected?.assigned_cluster)+1)+'). Câu đó được hiển thị ở phần kết quả phía trên; bảng này chỉ liệt kê thành viên của cụm hiện tại.';
+    return '<section class="rep-cluster-panel">'+
+      '<div class="rep-cluster-head"><div><h3>Cụm '+(Number(r.cluster)+1)+' · tâm μ'+(Number(r.cluster)+1)+'</h3>'+
+      '<p>Chỉ hiển thị các câu thuộc cụm này; khoảng cách Euclid thật tới tâm trong Word2Vec 256D.</p></div>'+
+      '<span class="rep-count">'+candidates.length+' câu trong cụm</span></div>'+
+      '<div class="rep-chosen-summary"><span class="rep-star">★</span><div><b>Đại diện pipeline chọn: '+esc(r.selected_id)+'</b><p>'+esc(r.selected_text||'')+'</p><small>Khoảng cách thật tới tâm này: '+num(Number(r.selected_distance),7)+'</small></div></div>'+
+      table(['Hạng trong cụm','ID câu','Văn bản','Khoảng cách thật 256D','Trạng thái'],rows)+
+      '<p class="rep-cluster-note">'+note+'</p></section>';
+  }).join('');
+  return metrics([[steps.length,'tâm cụm được xét'],[inClusterCount,'đại diện thuộc đúng cụm'],[points.length,'tổng số câu']])+
+    '<div class="flow-focus"><b>Cách đọc bảng</b>Mỗi bảng chỉ liệt kê các câu được K-Means gán vào cụm tương ứng, sắp theo khoảng cách Euclid thật tới tâm từ nhỏ đến lớn. Câu được pipeline chọn được đánh dấu ★ nếu thuộc cụm đó.</div>'+clusterTables+
+    (inClusterCount<steps.length?'<div class="note warn"><b>Lưu ý:</b> logic repository hiện tại có thể chọn câu gần một tâm nhất trên toàn bộ tập câu, dù câu đó được gán sang cụm khác. Khi đó câu đại diện thực tế vẫn hiện riêng ở phần trên, còn bảng chỉ chứa thành viên của cụm đang xem.</div>':'');
 }
-
 function representativeStep(item){
   const r=(DATA.representative_steps||[])[item.representativeIndex];
   if(!r)return '<div class="note warn">Không có nhật ký chọn đại diện.</div>';
