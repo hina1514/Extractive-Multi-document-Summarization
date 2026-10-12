@@ -11,6 +11,8 @@ const nextButtons = [...document.querySelectorAll(".next-step")];
 const copyBtn = document.querySelector("#copyBtn");
 
 let resultData = null;
+let demoData = null;
+let viewMode = "overview";
 let inputCount = 1;
 
 function escapeHtml(value) {
@@ -175,7 +177,7 @@ function renderMmr(data) {
 function renderSummary(data) {
   const summaryContainer = document.querySelector("#summaryView");
   const sourceContainer = document.querySelector("#sourceView");
-  const summaryRows = data.summary
+  const summaryRows = data.steps.sorting.before
     .map(
       (sentence, index) => `
         <article class="summary-row">
@@ -211,8 +213,12 @@ function renderSummary(data) {
     .join("");
 
   summaryContainer.className = "summary-list";
-  summaryContainer.innerHTML = explain("Giữ câu MMR → Bổ sung theo vị trí → Sắp thứ tự", `${data.stats.summaryMode === "auto" ? "Tự động" : "Theo yêu cầu"}: ${data.stats.summaryLength} câu từ ${data.stats.sentenceCount} câu hợp lệ. ${data.stats.requestedSummaryLength > data.stats.clusterCount ? "Yêu cầu vượt số đại diện; đầu ra được giới hạn theo số cụm. " : ""}Thứ tự kết quả theo danh sách đại diện đã xếp theo vị trí trong tài liệu, đúng file gốc. Phần tô vàng bên dưới chỉ câu được chọn.`) + summaryRows;
+  summaryContainer.innerHTML = explain("Giữ câu MMR → Bổ sung theo vị trí", `${data.stats.summaryMode === "auto" ? "Tự động" : "Theo yêu cầu"}: ${data.stats.summaryLength} câu từ ${data.stats.sentenceCount} câu hợp lệ. ${data.stats.requestedSummaryLength > data.stats.clusterCount ? "Yêu cầu vượt số đại diện; đầu ra được giới hạn theo số cụm. " : ""}Đây là tập câu đã chọn. Bước tiếp theo sắp lại theo đúng thứ tự tài liệu và câu trong input.`) + summaryRows;
   sourceContainer.innerHTML = documents;
+  const sortContainer = document.querySelector("#sortView");
+  sortContainer.className = "sort-stage";
+  sortContainer.innerHTML = explain("Sort tăng dần theo vị trí gốc", "Tài liệu theo thứ tự nhập; trong mỗi tài liệu, câu xuất hiện trước đứng trước. Chỉ đổi thứ tự, giữ nguyên tập câu và nội dung.") + window.SourceSortView.render(data.steps.sorting);
+  document.querySelector("#sortedSummaryView").innerHTML = '<h3 class="sorted-title">Bản tóm tắt sau Sort</h3>' + data.summary.map(sentence => `<article class="summary-row"><div class="summary-number">${sentence.order}</div><div><div class="doc-name">${escapeHtml(sentence.docName)} · câu ${sentence.sourcePosition}</div><div class="summary-text">${escapeHtml(sentence.text)}</div></div></article>`).join("");
 }
 
 function renderAll(data) {
@@ -228,6 +234,13 @@ function renderAll(data) {
 
 async function runSummarizer() {
   if (!summaryLength.checkValidity()) { summaryLength.reportValidity(); return; }
+  if (viewMode === "demo") {
+    for (const field of document.querySelectorAll("#demoSettings input")) {
+      if (!field.checkValidity()) { field.reportValidity(); return; }
+    }
+  }
+  window.PipelineDemo.stop();
+  const requestedMode = viewMode;
   const formData = new FormData();
   document.querySelectorAll('textarea[name="texts"]').forEach((textarea) => {
     formData.append("texts", textarea.value);
@@ -237,11 +250,20 @@ async function runSummarizer() {
   });
   formData.append("summaryLength", summaryLength.value);
 
+  if (requestedMode === "demo") {
+    formData.append("clusters", document.querySelector("#demoK").value);
+    formData.append("mode", document.querySelector("#demoMode").value);
+    formData.append("lambda", document.querySelector("#demoLambda").value);
+    formData.append("cosineThreshold", document.querySelector("#demoCosine").value);
+  }
   runBtn.disabled = true;
+  document.querySelector("#overviewModeBtn").disabled = true;
+  document.querySelector("#demoModeBtn").disabled = true;
+  document.querySelector(".result-pane").setAttribute("aria-busy", "true");
   setStatus("Đang xử lý văn bản...");
 
   try {
-    const response = await fetch("/api/summarize", {
+    const response = await fetch(requestedMode === "demo" ? "/api/pipeline" : "/api/summarize", {
       method: "POST",
       body: formData,
     });
@@ -251,13 +273,28 @@ async function runSummarizer() {
       throw new Error(payload.error || "Không xử lý được dữ liệu.");
     }
 
-    resultData = payload;
-    renderAll(payload);
-    setStatus(`Đã tạo ${payload.stats.summaryLength} câu · ${payload.stats.summaryMode === "auto" ? "chế độ tự động" : "theo số câu yêu cầu"}.`);
+    if (requestedMode === "demo") {
+      demoData = payload;
+      window.PipelineDemo.load(payload);
+      document.querySelector("#demoEmpty").hidden = true;
+      document.querySelector("#demoCopyBtn").disabled = false;
+      document.querySelector("#demoStats").innerHTML = [
+        [payload.documents, "tài liệu"], [payload.sentences.length, "câu hợp lệ"],
+        [payload.kmeans.k, "cụm K-means"], [payload.final.length, "câu tóm tắt"]
+      ].map(([value, label]) => `<div><strong>${value}</strong><span>${label}</span></div>`).join("");
+      setStatus(`Đã tính demo · ${payload.final.length} câu tóm tắt. Dùng Trước/Tiếp hoặc Tự chạy để khám phá.`);
+    } else {
+      resultData = payload;
+      renderAll(payload);
+      setStatus(`Đã tạo ${payload.stats.summaryLength} câu · ${payload.stats.summaryMode === "auto" ? "chế độ tự động" : "theo số câu yêu cầu"}.`);
+    }
   } catch (error) {
     setStatus(error.message, true);
   } finally {
     runBtn.disabled = false;
+    document.querySelector("#overviewModeBtn").disabled = false;
+    document.querySelector("#demoModeBtn").disabled = false;
+    document.querySelector(".result-pane").setAttribute("aria-busy", "false");
   }
 }
 
@@ -323,3 +360,45 @@ splitter.addEventListener("keydown", event => {
   event.preventDefault();
   resizePane(event.key === "Home" ? 24 : event.key === "End" ? 60 : panePercent + (event.key === "ArrowLeft" ? -2 : 2));
 });
+
+function setViewMode(mode) {
+  window.PipelineDemo.stop();
+  viewMode = mode;
+  const isDemo = mode === "demo";
+  document.querySelector("#overviewResults").hidden = isDemo;
+  document.querySelector("#interactiveDemo").hidden = !isDemo;
+  document.querySelector("#demoSettings").hidden = !isDemo;
+  for (const [id, active] of [["overviewModeBtn", !isDemo], ["demoModeBtn", isDemo]]) {
+    const button = document.querySelector(`#${id}`);
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", active);
+  }
+  setStatus(isDemo ? "Chế độ demo: nhập ít nhất 5 câu hợp lệ hoặc nạp văn bản mẫu rồi nhấn Chạy." : "Nhấn Chạy để tạo bản tóm tắt theo pipeline gốc.");
+}
+function loadDemoSample() {
+  textInputs.innerHTML = "";
+  inputCount = 0;
+  window.PipelineDemo.sample().forEach(addTextBox);
+  fileInput.value = "";
+  renderFiles();
+  setStatus("Đã nạp mẫu 3 tài liệu. Nhấn Chạy để xem demo.");
+}
+document.querySelector("#overviewModeBtn").addEventListener("click", () => setViewMode("overview"));
+document.querySelector("#demoModeBtn").addEventListener("click", () => setViewMode("demo"));
+document.querySelector("#demoSampleBtn").addEventListener("click", loadDemoSample);
+document.querySelector("#loadDemoSampleBtn").addEventListener("click", loadDemoSample);
+document.querySelector("#demoCopyBtn").addEventListener("click", async () => {
+  if (!demoData) return;
+  try {
+    await navigator.clipboard.writeText(demoData.final.map(sentence => sentence.text).join("\n"));
+    setStatus("Đã sao chép bản tóm tắt của demo.");
+  } catch { setStatus("Không thể sao chép. Hãy chọn văn bản và sao chép thủ công.", true); }
+});
+document.addEventListener("keydown", event => {
+  if (viewMode !== "demo" || !demoData || event.defaultPrevented || event.ctrlKey || event.altKey || event.metaKey) return;
+  if (event.target.closest("input, textarea, select, button, summary, [contenteditable], #splitter")) return;
+  if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+  event.preventDefault();
+  window.PipelineDemo.move(event.key === "ArrowLeft" ? -1 : 1);
+});
+window.addEventListener("pagehide", () => window.PipelineDemo.stop());

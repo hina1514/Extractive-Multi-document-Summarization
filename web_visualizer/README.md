@@ -28,7 +28,8 @@ http://127.0.0.1:5000
 2. `KMeans`: Word2Vec 256 chiều, cộng vector từ thành vector câu, gom cụm và chọn câu gần tâm. Mỗi thẻ hiển thị số thành viên thực tế, mở rộng để đọc các câu trong cụm.
 3. `Centroid`: chấm điểm TF-IDF theo chủ đề chung và lọc câu quá giống nhau (ngưỡng 0,95). Thanh điểm và nhãn cho biết câu được giữ.
 4. `MMR`: hiển thị thứ tự chọn thực tế, điểm liên quan và trùng lặp với công thức λ = 0,6. Câu đầu là câu mốc; chế độ train dùng mục tiêu số ứng viên Centroid trừ 4, tối thiểu giữ câu mốc.
-5. `Vị trí & kết quả`: bổ sung câu theo vị trí đến độ dài mục tiêu, hiển thị nguồn và lý do chọn; tô vàng câu được chọn trong văn bản nguồn và hỗ trợ sao chép.
+5. `Chọn & bổ sung`: giữ câu MMR, bổ sung câu theo vị trí đến độ dài mục tiêu; hiển thị tập câu trước Sort.
+6. `Sort & kết quả`: sắp theo thứ tự tài liệu nhập vào và vị trí câu trong tài liệu; đối chiếu trước–sau, tô vàng câu được chọn và sao chép bản đã Sort.
 
 ## Số câu và bố cục
 
@@ -46,5 +47,20 @@ http://127.0.0.1:5000
 ## Kiểm tra
 
 ```powershell
-.\.venv\Scripts\python.exe -m unittest web_visualizer.test_app -v
+.\.venv\Scripts\python.exe -m unittest web_visualizer.test_app web_visualizer.test_pipeline_demo web_visualizer.test_source_order -v
 ```
+
+## Demo tương tác tích hợp
+
+Chọn **Demo tương tác** ở đầu vùng kết quả. Phần này chạy trực tiếp `run_pipeline` và dùng lại các cảnh mô phỏng của `methods/main_method/interactive_pipeline_demo.py`, trong cùng web Flask; không cần chạy thêm server cổng 8765.
+
+- Nhập văn bản hoặc tải file như chế độ tổng quan. Có nút **Nạp mẫu 3 tài liệu** để thử nhanh.
+- Tham số demo gồm K (mặc định 8; xóa để tự động), λ MMR, chế độ train/test và ngưỡng cosine. Centroid demo dùng cosine + lọc trùng, khác với chế độ tổng quan dùng CentroidBow gốc.
+- Ô số câu tóm tắt dùng chung: để trống lấy tối đa số đại diện có sẵn; nhập 1–16 để giới hạn đầu ra. Số ứng viên MMR trong mô phỏng vẫn phản ánh chế độ train/test; giới hạn được áp dụng khi tạo kết quả cuối.
+- Sáu giai đoạn: Đầu vào & biểu diễn → K-means → Câu đại diện → Centroid → MMR → Kết quả. Dùng Trước/Tiếp, phím ←/→ ngoài ô nhập, hoặc Tự chạy và chỉnh tốc độ. Các cảnh K-means có điều khiển riêng để xem gán từng câu và dịch chuyển tâm.
+- Chuyển chế độ sẽ dừng mô phỏng và giữ kết quả của mỗi chế độ. Nhấn **Chạy** sau khi đổi nội dung/tham số để tính lại.
+- Demo giới hạn 30 tài liệu, 100.000 ký tự, 5–300 câu hợp lệ, K tối đa 30; ngưỡng cosine quá cao có thể không giữ được câu nào và sẽ báo cần giảm ngưỡng.
+
+`web_visualizer/pipeline_demo.py` chuyển renderer từ file demo thành asset có phạm vi riêng để giữ giao diện chung. Khởi động lại Flask sau khi sửa file demo để cập nhật renderer.
+
+Bước cuối ở cả hai chế độ là **Sort theo thứ tự input**. Sort giữ nguyên tập câu đã chọn, chỉ sắp theo chỉ số xuất hiện gốc; nội dung sao chép cũng dùng thứ tự này. Đồ thị demo có màu cụm đậm, tâm dạng sao, khung biểu đồ và chi tiết câu khi hover hoặc focus một điểm.

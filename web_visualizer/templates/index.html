@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Trực quan hóa tóm tắt đa văn bản</title>
+    <link rel="stylesheet" href="{{ url_for('pipeline_demo_styles') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   </head>
   <body>
@@ -54,12 +55,28 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
             </label>
             <button id="runBtn" class="primary-button" type="button">Chạy</button>
           </div>
+          <details id="demoSettings" class="demo-settings" hidden open>
+            <summary>Tham số demo tương tác</summary>
+            <div class="demo-settings-grid">
+              <label>Số cụm K<input id="demoK" type="number" min="1" max="30" value="8" placeholder="Tự động"></label>
+              <label>Chế độ MMR<select id="demoMode"><option value="train">Train · như pipeline gốc</option><option value="test">Test · tối đa 16 câu</option></select></label>
+              <label>λ MMR<input id="demoLambda" type="number" min="0" max="1" step="0.05" value="0.6"></label>
+              <label>Ngưỡng cosine<input id="demoCosine" type="number" min="0" max="1" step="0.05" value="0.35"></label>
+            </div>
+            <p class="input-hint">Centroid dùng cosine + lọc trùng. Cần 5–300 câu hợp lệ; tối đa 30 tài liệu. Đổi tham số rồi nhấn Chạy để tính lại.</p>
+            <button id="loadDemoSampleBtn" class="secondary-button" type="button">Nạp mẫu 3 tài liệu</button>
+          </details>
           <p id="lengthHint" class="input-hint">Để trống: tự chọn 3–10 câu theo số câu hợp lệ. Nhập số: chọn tối đa số câu đại diện.</p>
           <p id="status" class="status" aria-live="polite"></p>
         </aside>
 
         <div id="splitter" class="splitter" role="separator" tabindex="0" aria-label="Kéo để đổi chiều rộng vùng nhập" aria-orientation="vertical" aria-valuemin="24" aria-valuemax="60" aria-valuenow="32" title="Kéo trái/phải · phím mũi tên · nhấp đúp để đặt lại"><span>⋮</span></div>
         <section class="result-pane" aria-label="Kết quả trực quan">
+          <nav class="view-switch" aria-label="Chế độ xem">
+            <button id="overviewModeBtn" class="is-active" type="button" aria-pressed="true">Tóm tắt & tổng quan</button>
+            <button id="demoModeBtn" type="button" aria-pressed="false">Demo tương tác</button>
+          </nav>
+          <div id="overviewResults">
           <div class="result-header">
             <nav class="step-tabs" aria-label="Các bước">
               <button class="step-tab is-active" data-step="preprocess" type="button">
@@ -77,8 +94,9 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
               </button>
               <button class="step-tab" data-step="summary" type="button" disabled>
                 <span>5</span>
-                <strong>Vị trí & kết quả</strong>
+                <strong>Chọn & bổ sung</strong>
               </button>
+              <button class="step-tab" data-step="sort" type="button" disabled><span>6</span><strong>Sort & kết quả</strong></button>
             </nav>
 
             <section class="stats-bar" id="statsBar">
@@ -97,7 +115,7 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
               </div>
               <button class="secondary-button next-step" data-next="clusters" type="button" disabled>KMeans</button>
             </div>
-            <div id="preprocessView" class="empty-state"><div><h3>Từ văn bản đến bản tóm tắt</h3><p>Nhập hoặc tải lên các tài liệu, rồi nhấn Chạy.</p><p>Khám phá 5 bước và xem vì sao mỗi câu được chọn.</p></div></div>
+            <div id="preprocessView" class="empty-state"><div><h3>Từ văn bản đến bản tóm tắt</h3><p>Nhập hoặc tải lên các tài liệu, rồi nhấn Chạy.</p><p>Khám phá 6 bước và xem vì sao mỗi câu được chọn.</p></div></div>
           </section>
 
           <section class="step-panel" id="clustersPanel">
@@ -130,17 +148,27 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
             <div class="section-heading">
               <div>
                 <p class="eyebrow">Bước 5</p>
-                <h2>Bản tóm tắt và highlight</h2>
+                <h2>Tập câu trước khi sắp xếp</h2>
               </div>
-              <button id="copyBtn" class="secondary-button" type="button" disabled>Sao chép</button>
+              <button class="secondary-button next-step" data-next="sort" type="button" disabled>Tiếp: Sort theo input →</button>
             </div>
             <div id="summaryView" class="empty-state">Chưa có dữ liệu.</div>
+
+          </section>
+          <section class="step-panel" id="sortPanel">
+            <div class="section-heading"><div><p class="eyebrow">Bước 6 · Cuối cùng</p><h2>Sort theo thứ tự câu trong input</h2></div><button id="copyBtn" class="secondary-button" type="button" disabled>Sao chép</button></div>
+            <div id="sortView" class="empty-state">Chưa có dữ liệu.</div>
+            <div id="sortedSummaryView" class="summary-list"></div>
             <div id="sourceView" class="source-view"></div>
           </section>
+          </div>
+          {% include "pipeline_demo.html" %}
         </section>
       </section>
     </main>
 
+    <script src="{{ url_for('static', filename='source_sort.js') }}"></script>
+    <script src="{{ url_for('pipeline_demo_script') }}"></script>
     <script src="{{ url_for('static', filename='app.js') }}"></script>
   </body>
 </html>

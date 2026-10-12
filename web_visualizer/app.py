@@ -5,7 +5,7 @@ import math
 import unicodedata
 from pathlib import Path
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 
@@ -18,6 +18,9 @@ from methods.main_method.Kmeans_CentroidBase_MMR_SentencePosition import Summari
 from methods.centroid.centroid_summarizer import CentroidBow
 from methods.maximal_marginal_relevance.mmr_summarizer import MMR
 from utils.sentence import Sentence
+from methods.main_method.interactive_pipeline_demo import run_pipeline
+from web_visualizer.pipeline_demo import demo_script, demo_styles
+from web_visualizer.source_order import sort_by_input
 
 try:
     from underthesea import sent_tokenize, word_tokenize
@@ -176,7 +179,7 @@ def preprocess_documents(documents):
         last_indexs.append(len(sentence_objects))
         kept = 0
 
-        for sentence in split_sentences(document["text"]):
+        for input_position, sentence in enumerate(split_sentences(document["text"])):
             tokens = tokenize_sentence(sentence)
             if len(tokens) <= 4:
                 continue
@@ -191,6 +194,7 @@ def preprocess_documents(documents):
                     "docIndex": doc_index,
                     "docName": document["name"],
                     "position": kept,
+                    "inputPosition": input_position,
                     "globalPosition": len(sentence_records),
                     "text": sentence,
                     "tokens": tokens,
@@ -343,9 +347,9 @@ def summarize(documents, requested_summary_length=None):
     final_candidate_indexes = [
         index for index in final_candidate_indexes if 0 <= index < len(candidate_to_original)
     ][:summary_length]
-    selected_original_indexes = [
+    selected_original_indexes = sorted([
         candidate_to_original[index] for index in final_candidate_indexes
-    ]
+    ])
     selected_order = {
         original_index: order
         for order, original_index in enumerate(selected_original_indexes, start=1)
@@ -410,9 +414,13 @@ def summarize(documents, requested_summary_length=None):
                 "order": display_index,
                 "displayOrder": display_index,
                 "reason": "mmr" if candidate_index in mmr_candidate_indexes else "position",
+                "sourceIndex": original_index,
+                "docIndex": sentence_records[original_index]["docIndex"],
+                "sourcePosition": sentence_records[original_index]["inputPosition"] + 1,
             }
         )
 
+    summary_sentences, sorting = sort_by_input(summary_sentences)
     document_views = []
     for doc_index, document in enumerate(documents):
         document_sentences = [
@@ -451,6 +459,7 @@ def summarize(documents, requested_summary_length=None):
             },
             "clusters": clusters,
             "mmr": mmr_steps,
+            "sorting": sorting,
         },
         "summary": summary_sentences,
         "pipeline": "methods/main_method/Kmeans_CentroidBase_MMR_SentencePosition.py",
@@ -460,6 +469,62 @@ def summarize(documents, requested_summary_length=None):
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.get("/demo/assets.js")
+def pipeline_demo_script():
+    return Response(demo_script(), mimetype="text/javascript")
+
+
+@app.get("/demo/assets.css")
+def pipeline_demo_styles():
+    return Response(demo_styles(), mimetype="text/css")
+
+
+@app.post("/api/pipeline")
+def api_pipeline():
+    try:
+        documents = build_documents(request.form.getlist("texts"), request.files.getlist("files"))
+        if not documents:
+            raise ValueError("Hãy nhập văn bản hoặc chọn ít nhất một file.")
+        raw_length = request.form.get("summaryLength", "").strip()
+        raw_k = request.form.get("clusters", "").strip()
+        try:
+            length = int(raw_length) if raw_length else None
+            clusters = int(raw_k) if raw_k else None
+        except ValueError:
+            raise ValueError("Số câu và số cụm K phải là số nguyên, hoặc để trống để tự động.")
+        if length is not None and not 1 <= length <= 16:
+            raise ValueError("Số câu phải từ 1 đến 16, hoặc để trống để tự động.")
+        result = run_pipeline({
+            "documents": [document["text"] for document in documents],
+            "clusters": clusters,
+            "mode": request.form.get("mode", "train"),
+            "lambda": request.form.get("lambda", "0.6"),
+            "centroid_mode": "cosine",
+            "cosine_threshold": request.form.get("cosineThreshold", "0.35"),
+            "summary_length": length,
+        })
+        result["sourceDocuments"] = documents
+        result["summaryMode"] = "auto" if length is None else "manual"
+        # Maintain source filenames from the shared uploader for all scenes.
+        for sentence in result["sentences"]:
+            sentence["doc_label"] = documents[sentence["doc"]]["name"]
+        for sentence in result["final"]:
+            source = result["sentences"][sentence["source_index"]]
+            sentence["doc_label"] = source["doc_label"]
+            sentence["sourceIndex"] = sentence["source_index"]
+            sentence["docIndex"] = source["doc"]
+            sentence["sourcePosition"] = source.get("input_position") or sum(
+                item["doc"] == source["doc"]
+                for item in result["sentences"][:sentence["source_index"] + 1]
+            )
+        result["final"], result["sorting"] = sort_by_input(result["final"])
+        return jsonify(result)
+    except (ValueError, TypeError) as error:
+        return jsonify({"error": str(error)}), 400
+    except Exception as error:
+        return jsonify({"error": f"Lỗi khi chạy demo: {error}"}), 500
 
 
 @app.route("/api/summarize", methods=["POST"])
