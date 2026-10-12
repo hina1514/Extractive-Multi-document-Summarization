@@ -1,0 +1,24 @@
+<section id="interactiveDemo" hidden aria-label="Demo pipeline tương tác">
+  <div class="section-heading demo-intro">
+    <div><p class="eyebrow">Khám phá thuật toán</p><h2>Demo tương tác</h2></div>
+    <button id="demoCopyBtn" class="secondary-button" type="button" disabled>Sao chép kết quả</button>
+  </div>
+  <div id="demoStats" class="stats-bar"></div>
+  <div id="demoEmpty" class="empty-state"><div><h3>Xem thuật toán thực hiện từng phép tính</h3><p>Dùng văn bản của bạn hoặc nạp mẫu 3 tài liệu.<br>Nhấn Chạy để khám phá K-means++, Centroid và MMR.</p><button id="demoSampleBtn" class="secondary-button" type="button">Nạp văn bản mẫu</button></div></div>
+  <div id="results" style="display:none">
+    <section class="flow-journey"><div class="flow-heading"><div><span class="flow-kicker">CÁC BƯỚC</span><h2>Trình tự thuật toán</h2></div><p>Chọn giai đoạn hoặc dùng Trước/Tiếp để xem từng thao tác.</p></div><div class="pills" id="flow-groups"></div></section>
+    <div class="flow-controls">
+      <button id="flow-prev" type="button">← Trước</button>
+      <button id="flow-play" class="primary" type="button">▶ Tự chạy</button>
+      <button id="flow-next" type="button">Tiếp →</button>
+      <label class="flow-speed-control" for="flow-speed">Tốc độ <select id="flow-speed" aria-label="Tốc độ tự chạy"><option value="4500">Chậm</option><option value="3000" selected>Vừa</option><option value="1800">Nhanh</option><option value="900">Rất nhanh</option></select></label>
+      <span id="flow-count" aria-live="polite"></span>
+      <progress id="flow-progress" max="1" value="0" aria-label="Tiến độ mô phỏng"></progress>
+    </div>
+    <section class="card flow-card">
+      <div class="flow-step-heading"><div class="flow-step-badge" id="flow-badge">01</div><div class="flow-step-copy"><div class="flow-step-kicker" id="flow-kicker"></div><h2 id="flow-title"></h2><p id="flow-description"></p></div><span class="flow-live" id="flow-live">ĐANG XEM</span></div>
+      <div class="flow-strip"><div class="flow-strip-head"><b>CÁC CÂU</b><span>Màu cụm · ★ câu đã chọn</span></div><div id="flow-strip"></div></div>
+      <div id="flow-content"></div>
+    </section>
+  </div>
+</section>
