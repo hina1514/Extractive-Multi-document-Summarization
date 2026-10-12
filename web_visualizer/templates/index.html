@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Trực quan hóa tóm tắt đa văn bản</title>
+    <link rel="stylesheet" href="{{ url_for('pipeline_demo_styles') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-topbar">
+        <div>
+          <p class="eyebrow">Vietnamese multi-document summarization</p>
+          <h1>Trực quan hóa tóm tắt đa văn bản</h1>
+        </div>
+        <div class="topbar-badges">
+          <span>Local</span>
+          <span>KMeans</span>
+          <span>MMR</span>
+        </div>
+      </header>
+
+      <section class="workspace" id="workspace">
+        <aside class="input-pane" aria-label="Nguồn văn bản">
+          <div class="pane-header">
+            <div>
+              <p class="eyebrow">Văn bản đầu vào</p>
+              <h2>Nguồn dữ liệu</h2>
+            </div>
+            <button class="icon-button" id="addTextBtn" type="button" title="Thêm văn bản">+</button>
+          </div>
+
+          <div id="textInputs" class="text-inputs">
+            <article class="text-box">
+              <div class="text-box-header">
+                <span>Văn bản 1</span>
+              </div>
+              <textarea name="texts">Content:
+Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ Paris đến Cairo, mang theo 66 người. Giới chức hàng không Ai Cập cho biết khả năng khủng bố đang được xem xét. Lực lượng tìm kiếm phát hiện một số mảnh vỡ trên Địa Trung Hải. Các chuyên gia cho rằng dữ liệu hộp đen sẽ rất quan trọng để xác định nguyên nhân vụ việc.</textarea>
+            </article>
+          </div>
+
+          <label class="file-picker">
+            <span class="file-icon">↑</span>
+            <span>Chọn file .txt, .docx, .pdf</span>
+            <input id="fileInput" type="file" name="files" multiple accept=".txt,.docx,.pdf">
+          </label>
+          <div id="fileList" class="file-list"></div>
+
+          <div class="controls">
+            <label>
+              <span>Số câu tóm tắt</span>
+              <input id="summaryLength" type="number" min="1" max="16" placeholder="Tự động" aria-describedby="lengthHint">
+            </label>
+            <button id="runBtn" class="primary-button" type="button">Chạy</button>
+          </div>
+          <details id="demoSettings" class="demo-settings" hidden open>
+            <summary>Tham số demo tương tác</summary>
+            <div class="demo-settings-grid">
+              <label>Số cụm K<input id="demoK" type="number" min="1" max="30" value="8" placeholder="Tự động"></label>
+              <label>Chế độ MMR<select id="demoMode"><option value="train">Train · như pipeline gốc</option><option value="test">Test · tối đa 16 câu</option></select></label>
+              <label>λ MMR<input id="demoLambda" type="number" min="0" max="1" step="0.05" value="0.6"></label>
+              <label>Ngưỡng cosine<input id="demoCosine" type="number" min="0" max="1" step="0.05" value="0.35"></label>
+            </div>
+            <p class="input-hint">Centroid dùng cosine + lọc trùng. Cần 5–300 câu hợp lệ; tối đa 30 tài liệu. Đổi tham số rồi nhấn Chạy để tính lại.</p>
+            <button id="loadDemoSampleBtn" class="secondary-button" type="button">Nạp mẫu 3 tài liệu</button>
+          </details>
+          <p id="lengthHint" class="input-hint">Để trống: tự chọn 3–10 câu theo số câu hợp lệ. Nhập số: chọn tối đa số câu đại diện.</p>
+          <p id="status" class="status" aria-live="polite"></p>
+        </aside>
+
+        <div id="splitter" class="splitter" role="separator" tabindex="0" aria-label="Kéo để đổi chiều rộng vùng nhập" aria-orientation="vertical" aria-valuemin="24" aria-valuemax="60" aria-valuenow="32" title="Kéo trái/phải · phím mũi tên · nhấp đúp để đặt lại"><span>⋮</span></div>
+        <section class="result-pane" aria-label="Kết quả trực quan">
+          <nav class="view-switch" aria-label="Chế độ xem">
+            <button id="overviewModeBtn" class="is-active" type="button" aria-pressed="true">Tóm tắt & tổng quan</button>
+            <button id="demoModeBtn" type="button" aria-pressed="false">Demo tương tác</button>
+          </nav>
+          <div id="overviewResults">
+          <div class="result-header">
+            <nav class="step-tabs" aria-label="Các bước">
+              <button class="step-tab is-active" data-step="preprocess" type="button">
+                <span>1</span>
+                <strong>Tiền xử lý</strong>
+              </button>
+              <button class="step-tab" data-step="clusters" type="button" disabled>
+                <span>2</span>
+                <strong>KMeans</strong>
+              </button>
+              <button class="step-tab" data-step="centroid" type="button" disabled><span>3</span><strong>Centroid</strong></button>
+              <button class="step-tab" data-step="mmr" type="button" disabled>
+                <span>4</span>
+                <strong>MMR</strong>
+              </button>
+              <button class="step-tab" data-step="summary" type="button" disabled>
+                <span>5</span>
+                <strong>Chọn & bổ sung</strong>
+              </button>
+              <button class="step-tab" data-step="sort" type="button" disabled><span>6</span><strong>Sort & kết quả</strong></button>
+            </nav>
+
+            <section class="stats-bar" id="statsBar">
+              <div><strong>0</strong><span>văn bản</span></div>
+              <div><strong>0</strong><span>câu</span></div>
+              <div><strong>0</strong><span>cụm</span></div>
+              <div><strong>0</strong><span>câu tóm tắt</span></div>
+            </section>
+          </div>
+
+          <section class="step-panel is-active" id="preprocessPanel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Bước 1</p>
+                <h2>Câu và từ khóa</h2>
+              </div>
+              <button class="secondary-button next-step" data-next="clusters" type="button" disabled>KMeans</button>
+            </div>
+            <div id="preprocessView" class="empty-state"><div><h3>Từ văn bản đến bản tóm tắt</h3><p>Nhập hoặc tải lên các tài liệu, rồi nhấn Chạy.</p><p>Khám phá 6 bước và xem vì sao mỗi câu được chọn.</p></div></div>
+          </section>
+
+          <section class="step-panel" id="clustersPanel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Bước 2</p>
+                <h2>Cụm câu đại diện</h2>
+              </div>
+              <button class="secondary-button next-step" data-next="centroid" type="button" disabled>Centroid</button>
+            </div>
+            <div id="clusterView" class="empty-state">Chưa có dữ liệu.</div>
+          </section>
+
+          <section class="step-panel" id="centroidPanel">
+            <div class="section-heading"><div><p class="eyebrow">Bước 3</p><h2>Chọn câu gần chủ đề chung</h2></div><button class="secondary-button next-step" data-next="mmr" type="button" disabled>Tiếp: MMR →</button></div>
+            <div id="centroidView" class="empty-state">Chưa có dữ liệu.</div>
+          </section>
+          <section class="step-panel" id="mmrPanel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Bước 4</p>
+                <h2>Xếp hạng MMR</h2>
+              </div>
+              <button class="secondary-button next-step" data-next="summary" type="button" disabled>Tiếp: kết quả →</button>
+            </div>
+            <div id="mmrView" class="empty-state">Chưa có dữ liệu.</div>
+          </section>
+
+          <section class="step-panel" id="summaryPanel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Bước 5</p>
+                <h2>Tập câu trước khi sắp xếp</h2>
+              </div>
+              <button class="secondary-button next-step" data-next="sort" type="button" disabled>Tiếp: Sort theo input →</button>
+            </div>
+            <div id="summaryView" class="empty-state">Chưa có dữ liệu.</div>
+
+          </section>
+          <section class="step-panel" id="sortPanel">
+            <div class="section-heading"><div><p class="eyebrow">Bước 6 · Cuối cùng</p><h2>Sort theo thứ tự câu trong input</h2></div><button id="copyBtn" class="secondary-button" type="button" disabled>Sao chép</button></div>
+            <div id="sortView" class="empty-state">Chưa có dữ liệu.</div>
+            <div id="sortedSummaryView" class="summary-list"></div>
+            <div id="sourceView" class="source-view"></div>
+          </section>
+          </div>
+          {% include "pipeline_demo.html" %}
+        </section>
+      </section>
+    </main>
+
+    <script src="{{ url_for('static', filename='source_sort.js') }}"></script>
+    <script src="{{ url_for('pipeline_demo_script') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+  </body>
+</html>

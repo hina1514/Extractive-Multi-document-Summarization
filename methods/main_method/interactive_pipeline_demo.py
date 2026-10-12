@@ -2435,6 +2435,7 @@ def run_pipeline(payload):
     boundaries = []
 
     source_doc = []
+    source_positions = []
 
     dropped_count = 0
 
@@ -2444,7 +2445,7 @@ def run_pipeline(payload):
 
         boundaries.append(len(sentences))
 
-        for original in sent_tokenize(text.strip()):
+        for input_position, original in enumerate(sent_tokenize(text.strip())):
 
             original = original.strip()
 
@@ -2467,6 +2468,7 @@ def run_pipeline(payload):
             sentences.append(Sentence("doc_" + str(document_index + 1), processed, original))
 
             source_doc.append(document_index)
+            source_positions.append(input_position)
 
 
 
@@ -2730,6 +2732,7 @@ def run_pipeline(payload):
             "text": sentence.getOGwords(), "tokens": sentence.getProcessedWords(),
 
             "doc": source_doc[i], "doc_label": "Tài liệu " + str(source_doc[i] + 1),
+            "input_position": source_positions[i] + 1,
 
             "x": _json_number(pca_sentences[i][0]), "y": _json_number(pca_sentences[i][1]),
             "vector_preview": [_json_number(v) for v in X[i][:8]],
@@ -3129,11 +3132,17 @@ def run_pipeline(payload):
 
     mmr_strings = [item.getOGwords() for item in summary]
 
-    final_target = min(4, n_clusters)
+    requested_length = payload.get("summary_length", 4)
+    if requested_length is None:
+        requested_length = 16
+    if isinstance(requested_length, bool) or not isinstance(requested_length, int) or not 1 <= requested_length <= 16:
+        raise ValueError("Số câu phải là số nguyên từ 1 đến 16, hoặc để trống để tự động.")
+    final_target = min(requested_length, n_clusters, len(new_sents))
+    mmr_for_final = mmr_strings[:final_target] if "summary_length" in payload else mmr_strings
 
     final_index = Summarizer(n_clusters=n_clusters, len_summary=final_target).add_position(
 
-        new_sents, mmr_strings, final_target, index_sents, n_clusters
+        new_sents, mmr_for_final, final_target, index_sents, n_clusters
 
     )
 

@@ -65,7 +65,7 @@ class Summarizer(object):
 
         return indexs
 
-    def kmean_summarizer(self, sentences, text_sents, org_sents, last_indexs, n_clusters=30):
+    def kmean_summarizer(self, sentences, text_sents, org_sents, last_indexs, n_clusters=30, return_trace=False):
         model = Word2Vec(sentences=text_sents,vector_size=256,window=5,min_count=1, workers=4,sg=0)
 
         X = []
@@ -95,6 +95,12 @@ class Summarizer(object):
         new_sents = [org_sents[idx] for idx in position_index]
         object_sents = [sentences[idx] for idx in position_index]
 
+        if return_trace:
+            return new_sents, object_sents, {
+                "labels": kmeans.labels_.tolist(),
+                "representatives": [int(i) for i in closest],
+                "averagePositions": [float(i) for i in avg],
+            }
         return new_sents, object_sents
 
     def mmr_summarizer(self, object_sents, index_sents, mode="train", length_sentence=16):
