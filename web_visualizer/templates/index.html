@@ -58,10 +58,10 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
           <details id="demoSettings" class="demo-settings" hidden open>
             <summary>Tham số demo tương tác</summary>
             <div class="demo-settings-grid">
-              <label>Số cụm K<input id="demoK" type="number" min="1" max="30" value="8" placeholder="Tự động"></label>
+              <label>Số cụm K<input id="demoK" type="number" min="1" max="30" value="{{ demo_defaults.clusters }}" placeholder="Tự động"></label>
               <label>Chế độ MMR<select id="demoMode"><option value="train">Train · như pipeline gốc</option><option value="test">Test · tối đa 16 câu</option></select></label>
-              <label>λ MMR<input id="demoLambda" type="number" min="0" max="1" step="0.05" value="0.6"></label>
-              <label>Ngưỡng cosine<input id="demoCosine" type="number" min="0" max="1" step="0.05" value="0.35"></label>
+              <label>λ MMR<input id="demoLambda" type="number" min="0" max="1" step="0.05" value="{{ demo_defaults['lambda'] }}"></label>
+              <label>Ngưỡng cosine<input id="demoCosine" type="number" min="0" max="1" step="0.05" value="{{ demo_defaults.cosineThreshold }}"></label>
             </div>
             <p class="input-hint">Centroid dùng cosine + lọc trùng. Cần 5–300 câu hợp lệ; tối đa 30 tài liệu. Đổi tham số rồi nhấn Chạy để tính lại.</p>
             <button id="loadDemoSampleBtn" class="secondary-button" type="button">Nạp mẫu 3 tài liệu</button>
@@ -88,15 +88,16 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
                 <strong>KMeans</strong>
               </button>
               <button class="step-tab" data-step="centroid" type="button" disabled><span>3</span><strong>Centroid</strong></button>
+              <button class="step-tab" data-step="lambda" type="button" disabled><span>4</span><strong>Điều chỉnh λ</strong></button>
               <button class="step-tab" data-step="mmr" type="button" disabled>
-                <span>4</span>
+                <span>5</span>
                 <strong>MMR</strong>
               </button>
               <button class="step-tab" data-step="summary" type="button" disabled>
-                <span>5</span>
+                <span>6</span>
                 <strong>Chọn & bổ sung</strong>
               </button>
-              <button class="step-tab" data-step="sort" type="button" disabled><span>6</span><strong>Sort & kết quả</strong></button>
+              <button class="step-tab" data-step="sort" type="button" disabled><span>7</span><strong>Sort & kết quả</strong></button>
             </nav>
 
             <section class="stats-bar" id="statsBar">
@@ -115,7 +116,7 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
               </div>
               <button class="secondary-button next-step" data-next="clusters" type="button" disabled>KMeans</button>
             </div>
-            <div id="preprocessView" class="empty-state"><div><h3>Từ văn bản đến bản tóm tắt</h3><p>Nhập hoặc tải lên các tài liệu, rồi nhấn Chạy.</p><p>Khám phá 6 bước và xem vì sao mỗi câu được chọn.</p></div></div>
+            <div id="preprocessView" class="empty-state"><div><h3>Từ văn bản đến bản tóm tắt</h3><p>Nhập hoặc tải lên các tài liệu, rồi nhấn Chạy.</p><p>Khám phá 7 bước và xem vì sao mỗi câu được chọn.</p></div></div>
           </section>
 
           <section class="step-panel" id="clustersPanel">
@@ -130,13 +131,19 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
           </section>
 
           <section class="step-panel" id="centroidPanel">
-            <div class="section-heading"><div><p class="eyebrow">Bước 3</p><h2>Chọn câu gần chủ đề chung</h2></div><button class="secondary-button next-step" data-next="mmr" type="button" disabled>Tiếp: MMR →</button></div>
+            <div class="section-heading"><div><p class="eyebrow">Bước 3</p><h2>Chọn câu gần chủ đề chung</h2></div><button class="secondary-button next-step" data-next="lambda" type="button" disabled>Tiếp: Điều chỉnh λ →</button></div>
             <div id="centroidView" class="empty-state">Chưa có dữ liệu.</div>
+          </section>
+          <section class="step-panel" id="lambdaPanel">
+            <div class="section-heading"><div><p class="eyebrow">Bước 4</p><h2>Điều chỉnh λ của MMR</h2></div></div>
+            <div class="explanation"><strong>MMR = λ × liên quan − (1 − λ) × trùng lặp</strong><p>λ lớn ưu tiên độ liên quan; λ nhỏ tăng mức phạt trùng lặp. Mặc định 0,6. Nhấn Áp dụng để tính lại kết quả theo λ mới.</p></div>
+            <div class="lambda-controls"><div><input id="overviewLambdaRange" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="λ MMR"><div class="lambda-endpoints"><span>0 · giảm trùng lặp</span><span>1 · ưu tiên liên quan</span></div></div><input id="overviewLambda" type="number" min="0" max="1" step="0.05" value="0.6" aria-label="Giá trị λ MMR"><button id="applyLambdaBtn" class="primary-button" type="button" disabled>Áp dụng & xem MMR →</button></div>
+            <p id="lambdaStatus" class="input-hint" aria-live="polite">λ đang dùng: 0,6</p>
           </section>
           <section class="step-panel" id="mmrPanel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Bước 4</p>
+                <p class="eyebrow">Bước 5</p>
                 <h2>Xếp hạng MMR</h2>
               </div>
               <button class="secondary-button next-step" data-next="summary" type="button" disabled>Tiếp: kết quả →</button>
@@ -147,7 +154,7 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
           <section class="step-panel" id="summaryPanel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Bước 5</p>
+                <p class="eyebrow">Bước 6</p>
                 <h2>Tập câu trước khi sắp xếp</h2>
               </div>
               <button class="secondary-button next-step" data-next="sort" type="button" disabled>Tiếp: Sort theo input →</button>
@@ -156,7 +163,7 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
 
           </section>
           <section class="step-panel" id="sortPanel">
-            <div class="section-heading"><div><p class="eyebrow">Bước 6 · Cuối cùng</p><h2>Sort theo thứ tự câu trong input</h2></div><button id="copyBtn" class="secondary-button" type="button" disabled>Sao chép</button></div>
+            <div class="section-heading"><div><p class="eyebrow">Bước 7 · Cuối cùng</p><h2>Sort theo thứ tự câu trong input</h2></div><button id="copyBtn" class="secondary-button" type="button" disabled>Sao chép</button></div>
             <div id="sortView" class="empty-state">Chưa có dữ liệu.</div>
             <div id="sortedSummaryView" class="summary-list"></div>
             <div id="sourceView" class="source-view"></div>

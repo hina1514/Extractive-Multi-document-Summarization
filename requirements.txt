@@ -1,5 +1,2 @@
-numpy
-scikit-learn
-scipy
-gensim
-underthesea
+-r web_visualizer/requirements.txt
+streamlit==1.65.0

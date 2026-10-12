@@ -18,8 +18,7 @@ from methods.main_method.Kmeans_CentroidBase_MMR_SentencePosition import Summari
 from methods.centroid.centroid_summarizer import CentroidBow
 from methods.maximal_marginal_relevance.mmr_summarizer import MMR
 from utils.sentence import Sentence
-from methods.main_method.interactive_pipeline_demo import run_pipeline
-from web_visualizer.pipeline_demo import demo_script, demo_styles
+from web_visualizer.pipeline_demo import demo_script, demo_styles, demo_module, demo_defaults
 from web_visualizer.source_order import sort_by_input
 
 try:
@@ -246,7 +245,7 @@ def finite_score(value):
     return float(value) if math.isfinite(value) else 0.0
 
 
-def mmr_scores(object_sents, index_sents, mmr_summaries):
+def mmr_scores(object_sents, index_sents, mmr_summaries, lambta=0.6):
     candidates = [object_sents[index] for index in index_sents]
     if not candidates:
         return {}
@@ -276,7 +275,7 @@ def mmr_scores(object_sents, index_sents, mmr_summaries):
         scores[id(candidate)] = {
             "relevance": finite_score(relevance),
             "redundancy": finite_score(redundancy),
-            "mmrScore": finite_score(0.6 * relevance - 0.4 * redundancy),
+            "mmrScore": finite_score(lambta * relevance - (1 - lambta) * redundancy),
         }
         selected.append(candidate)
 
@@ -297,7 +296,7 @@ def index_mmr_summaries(new_sents, mmr_summaries):
     return indexes
 
 
-def summarize(documents, requested_summary_length=None):
+def summarize(documents, requested_summary_length=None, lambta=0.6):
     sentence_objects, sentence_records, last_indexs = preprocess_documents(documents)
     if not sentence_objects:
         raise ValueError("Không tìm thấy câu hợp lệ để tóm tắt. Mỗi câu cần có ít nhất 5 từ.")
@@ -332,10 +331,11 @@ def summarize(documents, requested_summary_length=None):
         object_sents,
         index_sents,
         mode="train",
+        lambta=lambta,
     )
     mmr_candidate_indexes = index_mmr_summaries(new_sents, mmr_summaries)
     centroid_score_by_index = centroid_scores(new_sents)
-    mmr_score_by_object = mmr_scores(object_sents, index_sents, mmr_summaries)
+    mmr_score_by_object = mmr_scores(object_sents, index_sents, mmr_summaries, lambta)
 
     final_candidate_indexes = summarizer.add_position(
         new_sents,
@@ -451,6 +451,7 @@ def summarize(documents, requested_summary_length=None):
             "targetSummaryLength": summary_length,
             "centroidCount": len(index_sents),
             "mmrCount": len(mmr_candidate_indexes),
+            "lambda": lambta,
         },
         "steps": {
             "preprocess": {
@@ -468,17 +469,17 @@ def summarize(documents, requested_summary_length=None):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", demo_defaults=demo_defaults())
 
 
 @app.get("/demo/assets.js")
 def pipeline_demo_script():
-    return Response(demo_script(), mimetype="text/javascript")
+    return Response(demo_script(), mimetype="text/javascript", headers={"Cache-Control": "no-store"})
 
 
 @app.get("/demo/assets.css")
 def pipeline_demo_styles():
-    return Response(demo_styles(), mimetype="text/css")
+    return Response(demo_styles(), mimetype="text/css", headers={"Cache-Control": "no-store"})
 
 
 @app.post("/api/pipeline")
@@ -496,7 +497,7 @@ def api_pipeline():
             raise ValueError("Số câu và số cụm K phải là số nguyên, hoặc để trống để tự động.")
         if length is not None and not 1 <= length <= 16:
             raise ValueError("Số câu phải từ 1 đến 16, hoặc để trống để tự động.")
-        result = run_pipeline({
+        result = demo_module().run_pipeline({
             "documents": [document["text"] for document in documents],
             "clusters": clusters,
             "mode": request.form.get("mode", "train"),
@@ -544,7 +545,13 @@ def api_summarize():
         if not documents:
             return jsonify({"error": "Hãy nhập văn bản hoặc chọn ít nhất một file."}), 400
 
-        result = summarize(documents, summary_length)
+        try:
+            lambta = float(request.form.get("lambda", "0.6"))
+        except ValueError:
+            raise ValueError("λ MMR phải là số từ 0 đến 1.")
+        if not math.isfinite(lambta) or not 0 <= lambta <= 1:
+            raise ValueError("λ MMR phải nằm trong khoảng 0 đến 1.")
+        result = summarize(documents, summary_length, lambta)
         return jsonify(result)
     except ValueError as error:
         return jsonify({"error": str(error)}), 400

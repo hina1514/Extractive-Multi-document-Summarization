@@ -103,7 +103,7 @@ class Summarizer(object):
             }
         return new_sents, object_sents
 
-    def mmr_summarizer(self, object_sents, index_sents, mode="train", length_sentence=16):
+    def mmr_summarizer(self, object_sents, index_sents, mode="train", length_sentence=16, lambta=0.6):
         new_sents_mmr = []
 
         for item in index_sents:
@@ -115,9 +115,9 @@ class Summarizer(object):
         IDF_w = MMR.IDFs(new_sents_mmr)
 
         if mode == "train":
-            summary = makeSummary(remaining_sents, best_sent, best_sent, len(new_sents_mmr) - 4, 0.6, IDF_w)
+            summary = makeSummary(remaining_sents, best_sent, best_sent, len(new_sents_mmr) - 4, lambta, IDF_w)
         else:
-            summary = makeSummary(remaining_sents, best_sent, best_sent, length_sentence, 0.6, IDF_w)
+            summary = makeSummary(remaining_sents, best_sent, best_sent, length_sentence, lambta, IDF_w)
 
         mmr_summaries = []
         for item in summary:
