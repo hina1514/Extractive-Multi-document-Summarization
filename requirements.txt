@@ -1,0 +1,6 @@
+numpy
+gensim
+scikit-learn
+scipy
+underthesea
+gensim
