@@ -166,6 +166,44 @@ PAGE = r'''<!doctype html>
 .mmr-phase-title{display:flex;align-items:center;gap:9px;margin:14px 0 7px;font-size:14px;font-weight:850}
 .mmr-phase-title span{display:grid;place-items:center;flex:0 0 27px;width:27px;height:27px;border-radius:8px;background:#e9edff;color:#5268e8;font-size:11px}
 @media(max-width:650px){.mmr-state-row{grid-template-columns:1fr}.centroid-cosine-row{grid-template-columns:65px minmax(70px,1fr) 70px}}
+/* Công thức Centroid: dùng phân số, chỉ số và ký hiệu toán học thay vì kiểu chữ mã nguồn. */
+.math-equation,.formula.math-formula{
+  display:block;
+  font-family:"Cambria Math","STIX Two Math","Times New Roman",serif!important;
+  font-size:15px!important;line-height:1.9!important;letter-spacing:.005em;color:#302f45;
+  text-align:center;white-space:normal;
+}
+.math-equation .eq-line,.math-formula .eq-line{display:block;margin:3px 0;white-space:normal}
+.math-equation i,.math-formula i{font-family:"Cambria Math","Times New Roman",serif;font-style:italic}
+.math-equation .math-op,.math-formula .math-op{font-style:normal;font-weight:500}
+.math-equation sub,.math-formula sub{font-size:.72em;vertical-align:-.3em}
+.math-equation sup,.math-formula sup{font-size:.72em;vertical-align:.45em}
+.math-frac{display:inline-grid;grid-template-rows:auto auto;vertical-align:middle;text-align:center;line-height:1.15;margin:0 .14em;white-space:normal}
+.math-frac>span:first-child{display:block;padding:0 .25em .08em;border-bottom:1px solid currentColor}
+.math-frac>span:last-child{display:block;padding:.08em .25em 0}
+.math-piecewise{display:inline-grid;grid-template-columns:auto auto;column-gap:.38em;vertical-align:middle;text-align:left;line-height:1.45;margin-left:.2em}
+.math-piecewise .brace{grid-row:1/3;align-self:center;font-size:2.3em;line-height:1;font-family:"Times New Roman",serif}
+
+/* Bảng cosine: phân bổ cột theo tỷ lệ để các cột số không bị đẩy quá xa nhau. */
+.centroid-cosine-table .scroll{width:100%;overflow-x:auto}
+.centroid-cosine-table .scroll table{table-layout:fixed!important;width:100%!important;min-width:1120px!important}
+.centroid-cosine-table .scroll th:nth-child(1),.centroid-cosine-table .scroll td:nth-child(1){width:4.2%!important}
+.centroid-cosine-table .scroll th:nth-child(2),.centroid-cosine-table .scroll td:nth-child(2){width:4.5%!important}
+.centroid-cosine-table .scroll th:nth-child(3),.centroid-cosine-table .scroll td:nth-child(3){width:21.3%!important}
+.centroid-cosine-table .scroll th:nth-child(4),.centroid-cosine-table .scroll td:nth-child(4){width:32%!important}
+.centroid-cosine-table .scroll th:nth-child(5),.centroid-cosine-table .scroll td:nth-child(5){width:9%!important}
+.centroid-cosine-table .scroll th:nth-child(6),.centroid-cosine-table .scroll td:nth-child(6){width:7.4%!important}
+.centroid-cosine-table .scroll th:nth-child(7),.centroid-cosine-table .scroll td:nth-child(7){width:7.4%!important}
+.centroid-cosine-table .scroll th:nth-child(8),.centroid-cosine-table .scroll td:nth-child(8){width:8.7%!important}
+.centroid-cosine-table .scroll th:nth-child(9),.centroid-cosine-table .scroll td:nth-child(9){width:5.5%!important}
+.centroid-cosine-table .scroll th,.centroid-cosine-table .scroll td{padding:7px 7px!important}
+.centroid-cosine-table .math-equation{font-size:12px!important;line-height:1.35!important;text-align:left}
+.centroid-cosine-table .math-equation .eq-line{white-space:nowrap;margin:1px 0}
+.centroid-cosine-table .scroll td:nth-child(4){padding-left:8px!important;padding-right:8px!important}
+.math-piecewise .case{white-space:normal}
+.math-explain{margin:7px 0 10px;color:#64708a;font-size:12px;line-height:1.65;text-align:left}
+@media(max-width:650px){.math-equation,.formula.math-formula{font-size:14px!important}.math-frac{margin:0 .06em}}
+
 
 
 
@@ -255,6 +293,9 @@ PAGE = r'''<!doctype html>
 
 /* Lecture-grade, step-by-step scenes: the animation is constrained to the algorithm stage. */
 .km-lesson-shell{border:1px solid #dbe4f3;border-radius:16px;background:#f8faff;padding:13px;margin:12px 0}
+.plot text{paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.type-km-final .plot{max-height:520px}
+#km-move-stage .km-lesson-svg{min-height:300px}
 .km-lesson-toolbar{display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 10px}
 .km-lesson-toolbar button{min-height:37px}
 .km-lesson-toolbar .km-primary{background:#5268e8;color:#fff;border-color:#5268e8}
@@ -700,7 +741,7 @@ button.primary,.flow-controls #flow-play,.km-graph-toolbar .km-graph-play,
 
 <div class="layout"><aside class="card input-card"><details id="input-details" class="input-details" open><summary><span><strong>Văn bản đầu vào & tham số</strong><small>Mở để sửa tài liệu, số cụm K, ngưỡng cosine hoặc λ của MMR.</small></span><b class="details-toggle">Hiện / ẩn</b></summary><div class="input-details-body"><div id="docs"></div><div class="actions"><button id="add-doc" type="button">＋ Thêm tài liệu</button><button id="sample" type="button">Khôi phục mẫu</button></div>
 
-<div class="settings"><div class="setting"><label for="clusters">Số cụm K</label><select id="clusters"><option value="custom" selected>Tùy chỉnh (8)</option><option value="auto">Tự động theo main</option></select></div><div class="setting"><label for="custom-k">K tùy chỉnh</label><input id="custom-k" type="number" value="8" min="1" max="30"></div><div class="setting"><label for="mode">Chế độ MMR</label><select id="mode"><option value="train" selected>Train · như main</option><option value="test">Test · tối đa 16 câu</option></select></div><div class="setting"><label for="lambda">λ trong MMR</label><input id="lambda" type="number" value="0.6" min="0" max="1" step="0.05"></div><div class="setting"><label>Chọn câu Centroid</label><div class="flow-equation" style="margin:0;padding:8px">Cosine + ngưỡng lọc trùng</div></div><div class="setting"><label for="cosine-threshold">Ngưỡng cosine</label><input id="cosine-threshold" type="number" value="0.35" min="0" max="1" step="0.05"></div><p class="hint wide">K tùy chỉnh mặc định là 8 để quan sát nhiều cụm. K-means chạy đến khi hội tụ, không cố định 2 vòng. Chỉnh ngưỡng cosine hoặc λ rồi bấm “Chạy pipeline” để cập nhật tập câu chuyển sang MMR.</p></div></div></details><div class="input-run-row"><button class="primary" id="run" type="button">Chạy pipeline</button><div class="status" id="status" role="status"></div></div></aside>
+<div class="settings"><div class="setting"><label for="clusters">Số cụm K</label><select id="clusters"><option value="custom" selected>Tùy chỉnh</option><option value="auto">Tự động theo main</option></select></div><div class="setting"><label for="custom-k">K tùy chỉnh</label><input id="custom-k" type="number" value="6" min="1" max="30"></div><div class="setting"><label for="mode">Chế độ MMR</label><select id="mode"><option value="train" selected>Train · như main</option><option value="test">Test · tối đa 16 câu</option></select></div><div class="setting"><label for="lambda">λ trong MMR</label><input id="lambda" type="number" value="0.6" min="0" max="1" step="0.05"></div><div class="setting"><label>Chọn câu Centroid</label><div class="flow-equation" style="margin:0;padding:8px">Cosine + ngưỡng lọc trùng</div></div><div class="setting"><label for="cosine-threshold">Ngưỡng cosine</label><input id="cosine-threshold" type="number" value="0.35" min="0" max="1" step="0.05"></div><p class="hint wide">K tùy chỉnh mặc định là 8 để quan sát nhiều cụm. K-means chạy đến khi hội tụ, không cố định 2 vòng. Chỉnh ngưỡng cosine hoặc λ rồi bấm “Chạy pipeline” để cập nhật tập câu chuyển sang MMR.</p></div></div></details><div class="input-run-row"><button class="primary" id="run" type="button">Chạy pipeline</button><div class="status" id="status" role="status"></div></div></aside>
 
 <section class="workspace">
   <div class="card empty" id="empty"><div><strong>Chưa có kết quả</strong>Sửa văn bản mẫu hoặc nhập nội dung riêng, sau đó chạy pipeline.</div></div>
@@ -736,10 +777,10 @@ const LABELS=['1 · Tiền xử lý','2 · K-means','3 · Đại diện & Centro
 const FLOW_GROUPS=['Đầu vào & biểu diễn','K-means','Câu đại diện','Centroid','MMR','Kết quả'];
 
 const COLORS=['#8E9BE5','#65B49C','#D6A06E','#A78CD3','#C77F9B','#6BA9D0','#9FAB59','#8997A9','#BC8266','#66AEB5'];
-const KM_COLORS=['#AAB8F0','#A8DCCF','#F2C6A2','#CBB9E8','#E9B8C8','#A7D0E5','#D7DDA9','#BEC8D8','#E4B5A0','#A7DCDD'];
+const KM_COLORS=['#8798E0','#79C4B1','#E0A477','#B09AD8','#D991AA','#82B9D8','#B4C66F','#9BAABD','#C78B70','#78C3C6'];
 function starPath(cx,cy,outer=8,inner=3.6){const pts=[];for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,r=i%2===0?outer:inner;pts.push((cx+Math.cos(a)*r).toFixed(2)+' '+(cy+Math.sin(a)*r).toFixed(2));}return 'M '+pts.join(' L ')+' Z';}
 
-const $=id=>document.getElementById(id);let DATA=null,RUN_DOCS=[],stage=0,kmRestart=0,kmStep=0,centroidStep=0,mmrStep=0,flowSteps=[],flowIndex=0,flowTimer=null,kmAnimIndex=0,kmAnimTimer=null,kmLessonTimer=null,kmLessonState=null,kmInitTimer=null,kmInitState=null;
+const $=id=>document.getElementById(id);let DATA=null,RUN_DOCS=[],stage=0,kmRestart=0,kmStep=0,centroidStep=0,mmrStep=0,flowSteps=[],flowIndex=0,flowTimer=null,kmAnimIndex=0,kmAnimTimer=null,kmLessonTimer=null,kmLessonState=null,kmInitTimer=null,kmInitState=null,kmMoveTimer=null,kmMoveState=null;
 
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
@@ -782,6 +823,39 @@ function plot(frame, focusIndex=null){
   const pts=DATA.sentences,cs=frame.centers||[],after=frame.centers_after||cs;
   let xs=pts.map(p=>p.x).concat(cs.map(c=>c.x),after.map(c=>c.x)),ys=pts.map(p=>p.y).concat(cs.map(c=>c.y),after.map(c=>c.y));
   const project=pcaProjector(xs,ys,35,35,620,310),X=project.x,Y=project.y;
+  const pointXY=pts.map(p=>({x:X(p.x),y:Y(p.y),id:p.id}));
+  const centerXY=cs.map((c,j)=>({x:X(c.x),y:Y(c.y),id:String(j+1)}));
+  const placedLabels=[];
+  const offsets=[
+    {dx:11,dy:-9,a:'start'},{dx:11,dy:14,a:'start'},
+    {dx:-11,dy:-9,a:'end'},{dx:-11,dy:14,a:'end'},
+    {dx:0,dy:-14,a:'middle'},{dx:0,dy:18,a:'middle'},
+    {dx:16,dy:-16,a:'start'},{dx:16,dy:18,a:'start'},
+    {dx:-16,dy:-16,a:'end'},{dx:-16,dy:18,a:'end'},
+    {dx:0,dy:-22,a:'middle'},{dx:0,dy:25,a:'middle'}
+  ];
+  const rectFor=(x,y,text,anchor)=>{
+    const w=Math.max(14,String(text).length*5.7),left=anchor==='end'?x-w:(anchor==='middle'?x-w/2:x);
+    return {left,top:y-8,right:left+w,bottom:y+3};
+  };
+  const overlap=(a,b)=>!(a.right+2<b.left||b.right+2<a.left||a.bottom+2<b.top||b.bottom+2<a.top);
+  const pickLabel=(x,y,text,ownIndex,isCenter=false)=>{
+    let best=null,bestScore=Infinity;
+    for(let i=0;i<offsets.length;i++){
+      const o=offsets[i],lx=x+o.dx,ly=y+o.dy,box=rectFor(lx,ly,text,o.a);let score=i*.001;
+      for(const r of placedLabels)if(overlap(box,r))score+=1000;
+      const markers=pointXY.concat(centerXY);
+      markers.forEach((m,mi)=>{
+        if(!isCenter&&mi===ownIndex)return;
+        if(isCenter&&mi===pointXY.length+ownIndex)return;
+        const nearestX=Math.max(box.left,Math.min(m.x,box.right)),nearestY=Math.max(box.top,Math.min(m.y,box.bottom));
+        const d=Math.hypot(nearestX-m.x,nearestY-m.y);
+        if(d<7)score+=(7-d)*5;
+      });
+      if(score<bestScore){bestScore=score;best={x:lx,y:ly,anchor:o.a,box};}
+    }
+    placedLabels.push(best.box);return best;
+  };
   let out='<svg class="plot" viewBox="0 0 700 390" role="img" aria-label="PCA projection of sentence vectors and K-means centers">';
   out+='<text x="35" y="23" font-size="12" fill="#63708a">PCA 2D: độ dài trong hình chiếu · thuật toán dùng khoảng cách vector Word2Vec 256D</text>';
   out+='<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#65708a"/></marker></defs>';
@@ -789,21 +863,34 @@ function plot(frame, focusIndex=null){
     const a=cs[j],b=after[j]||a,color=KM_COLORS[j%KM_COLORS.length];
     if(Math.abs(a.x-b.x)+Math.abs(a.y-b.y)>1e-8)out+='<line x1="'+X(a.x)+'" y1="'+Y(a.y)+'" x2="'+X(b.x)+'" y2="'+Y(b.y)+'" stroke="'+color+'" stroke-width="1.4" stroke-dasharray="4 4" opacity=".62" marker-end="url(#arrow)"/>';
   }
+  // Keep the nearest-center relationship visible, but downplay competing centers.
   for(const p of pts){
     const cl=frame.assignments[p.index],color=KM_COLORS[cl%KM_COLORS.length],ds=(frame.distance_matrix||[])[p.index]||[],focused=focusIndex!==null&&p.index===focusIndex;
     for(let j=0;j<cs.length;j++){
       const center=cs[j],isChosen=j===cl;
-      if(center)out+='<line x1="'+X(p.x)+'" y1="'+Y(p.y)+'" x2="'+X(center.x)+'" y2="'+Y(center.y)+'" stroke="'+(isChosen?color:'#aeb8ca')+'" stroke-width="'+(focused?(isChosen?'2.2':'1.1'):(isChosen?'1.35':'.7'))+'" stroke-dasharray="'+(isChosen?'3 3':'2 5')+'" opacity="'+(focused?(isChosen?'.9':'.28'):(isChosen?'.7':'.13'))+'"><title>'+esc(p.id+' → μ'+(j+1)+' · d² thật 256D = '+(ds.length?num(ds[j],8):'không lưu')+'; không phải độ dài trên PCA'+(isChosen?' · tâm được chọn theo 256D':' · ứng viên so sánh'))+'</title></line>';
+      if(center)out+='<line x1="'+X(p.x)+'" y1="'+Y(p.y)+'" x2="'+X(center.x)+'" y2="'+Y(center.y)+'" stroke="'+(isChosen?color:'#aeb8ca')+'" stroke-width="'+(focused?(isChosen?'2.2':'1.1'):(isChosen?'1.35':'.7'))+'" stroke-dasharray="'+(isChosen?'3 3':'2 5')+'" opacity="'+(focused?(isChosen?'.9':'.28'):(isChosen?'.7':'.10') )+'"><title>'+esc(p.id+' → tâm '+(j+1)+' · d² thật 256D = '+(ds.length?num(ds[j],8):'không lưu')+'; không phải độ dài trên PCA'+(isChosen?' · tâm được chọn theo 256D':' · ứng viên so sánh'))+'</title></line>';
     }
-    if(focused)out+='<circle class="point-halo" cx="'+X(p.x)+'" cy="'+Y(p.y)+'" r="10"></circle>';
-    out+='<circle class="sentence-point '+(focused?'focused':'')+'" cx="'+X(p.x)+'" cy="'+Y(p.y)+'" r="'+(focused?'6':'4.4')+'" fill="'+color+'" stroke="#fff" stroke-width="2"><title>'+esc(p.id+' · được gán vào cụm '+(cl+1)+' · '+p.text)+'</title></circle><text x="'+(X(p.x)+9)+'" y="'+(Y(p.y)+4)+'" font-size="'+(focused?'10':'8')+'" font-weight="'+(focused?'900':'400')+'" fill="'+(focused?'#916A43':'#39445e')+'">'+esc(p.id)+'</text>';
   }
+  // Draw markers first so labels can be placed with collision-aware offsets around all nearby points.
+  pts.forEach((p)=>{
+    const cl=frame.assignments[p.index],color=KM_COLORS[cl%KM_COLORS.length],focused=focusIndex!==null&&p.index===focusIndex;
+    if(focused)out+='<circle class="point-halo" cx="'+X(p.x)+'" cy="'+Y(p.y)+'" r="10"></circle>';
+    out+='<circle class="sentence-point '+(focused?'focused':'')+'" cx="'+X(p.x)+'" cy="'+Y(p.y)+'" r="'+(focused?'6':'4.4')+'" fill="'+color+'" stroke="#fff" stroke-width="2"><title>'+esc(p.id+' · được gán vào cụm '+(cl+1)+' · '+p.text)+'</title></circle>';
+  });
+  pts.forEach((p)=>{
+    const xy={x:X(p.x),y:Y(p.y)},label=pickLabel(xy.x,xy.y,p.id,p.index,false),focused=focusIndex!==null&&p.index===focusIndex;
+    out+='<text x="'+label.x+'" y="'+label.y+'" text-anchor="'+label.anchor+'" font-size="'+(focused?'10':'9')+'" font-weight="'+(focused?'900':'650')+'" fill="'+(focused?'#76521D':'#283452')+'" paint-order="stroke" stroke="#fff" stroke-width="3" stroke-linejoin="round">'+esc(p.id)+'</text>';
+  });
   for(let j=0;j<cs.length;j++){
     const a=cs[j],b=after[j]||a,x=X(a.x),y=Y(a.y),xx=X(b.x),yy=Y(b.y),color=KM_COLORS[j%KM_COLORS.length];
-    out+='<circle cx="'+x+'" cy="'+y+'" r="3.5" fill="#fff" stroke="'+color+'" stroke-width="1.4"><title>Tâm đầu vòng μ'+(j+1)+'</title></circle>';
-    out+='<path d="'+starPath(xx,yy,8,3.5)+'" fill="'+color+'" stroke="#fff" stroke-width="1.2"><title>Tâm sau cập nhật μ'+(j+1)+'</title></path><text x="'+(xx+9)+'" y="'+(yy-8)+'" font-size="10" font-weight="800" fill="#68728A">μ'+(j+1)+'</text>';
+    out+='<circle cx="'+x+'" cy="'+y+'" r="3.8" fill="#fff" stroke="'+color+'" stroke-width="1.6"><title>Tâm đầu vòng '+(j+1)+'</title></circle>';
+    out+='<path d="'+starPath(xx,yy,8,3.5)+'" fill="'+color+'" stroke="#fff" stroke-width="1.2"><title>Tâm sau cập nhật '+(j+1)+'</title></path>';
   }
-  return out+'</svg><div class="legend">'+DATA.colors.map((x,i)=>'<span><i class="dot" style="background:'+KM_COLORS[i%KM_COLORS.length]+'"></i>Cụm '+(i+1)+'</span>').join('')+'<span>nét mờ: mọi tâm được so sánh</span><span>nét đậm: tâm gần nhất được chọn</span><span>○ tâm trước vòng</span><span>★ tâm mới</span><span>⇢ hướng dịch tâm</span></div>';
+  cs.forEach((a,j)=>{
+    const b=after[j]||a,x=X(b.x),y=Y(b.y),label=pickLabel(x,y,String(j+1),j,true),color=KM_COLORS[j%KM_COLORS.length];
+    out+='<text x="'+label.x+'" y="'+label.y+'" text-anchor="'+label.anchor+'" font-size="11" font-weight="900" fill="#202B50" paint-order="stroke" stroke="#fff" stroke-width="3.5" stroke-linejoin="round">'+(j+1)+'</text>';
+  });
+  return out+'</svg><div class="legend">'+DATA.colors.map((x,i)=>'<span><i class="dot" style="background:'+KM_COLORS[i%KM_COLORS.length]+'"></i>Cụm '+(i+1)+'</span>').join('')+'<span>nét mờ: tâm được so sánh</span><span>nét màu: tâm gần nhất được chọn</span><span>○ tâm trước vòng</span><span>★ tâm mới</span><span>⇢ hướng dịch tâm</span></div>';
 }
 
 function kmeansFinalConnections(){
@@ -813,9 +900,9 @@ function kmeansFinalConnections(){
   let xs=pts.map(p=>p.x).concat(cs.map(c=>c.x)),ys=pts.map(p=>p.y).concat(cs.map(c=>c.y));
   const project=pcaProjector(xs,ys,38,35,620,310),X=project.x,Y=project.y;
   let svg='<svg class="plot" viewBox="0 0 700 390" role="img" aria-label="K-means cuối cùng: nối từng điểm tới tâm cụm được gán">';
-  for(const p of pts){const cl=(frame.post_assignments||frame.assignments||[])[p.index]??0,c=cs[cl];if(!c)continue;const color=KM_COLORS[cl%KM_COLORS.length];svg+='<line x1="'+X(p.x)+'" y1="'+Y(p.y)+'" x2="'+X(c.x)+'" y2="'+Y(c.y)+'" stroke="'+color+'" stroke-width=".9" opacity=".48"><title>'+esc(p.id+' → μ'+(cl+1))+'</title></line>';}
+  for(const p of pts){const cl=(frame.post_assignments||frame.assignments||[])[p.index]??0,c=cs[cl];if(!c)continue;const color=KM_COLORS[cl%KM_COLORS.length];svg+='<line x1="'+X(p.x)+'" y1="'+Y(p.y)+'" x2="'+X(c.x)+'" y2="'+Y(c.y)+'" stroke="'+color+'" stroke-width="1.25" opacity=".68"><title>'+esc(p.id+' → tâm '+(cl+1))+'</title></line>';}
   for(const p of pts){const cl=(frame.post_assignments||frame.assignments||[])[p.index]??0,color=KM_COLORS[cl%KM_COLORS.length];svg+='<circle cx="'+X(p.x)+'" cy="'+Y(p.y)+'" r="4" fill="'+color+'" stroke="#fff" stroke-width="1.1"><title>'+esc(p.id+' · cụm '+(cl+1))+'</title></circle>';}
-  cs.forEach((c,j)=>{const x=X(c.x),y=Y(c.y),color=KM_COLORS[j%KM_COLORS.length];svg+='<path d="'+starPath(x,y,8.5,3.7)+'" fill="'+color+'" stroke="#fff" stroke-width="1.2"/><text x="'+(x+10)+'" y="'+(y-8)+'" fill="#68728A" font-size="10" font-weight="800">μ'+(j+1)+'</text>';});
+  cs.forEach((c,j)=>{const x=X(c.x),y=Y(c.y),color=KM_COLORS[j%KM_COLORS.length];svg+='<path d="'+starPath(x,y,8.5,3.7)+'" fill="'+color+'" stroke="#fff" stroke-width="1.2"/><text x="'+(x+10)+'" y="'+(y-8)+'" fill="#68728A" font-size="10" font-weight="800">'+(j+1)+'</text>';});
   return '<section class="centroid-pipeline"><h3>Ảnh cuối K-means · nối tâm với tất cả điểm thuộc cụm</h3><p class="small">Đường nối minh họa quan hệ điểm–tâm trong PCA 2D; việc gán cụm vẫn dựa trên khoảng cách thật của vector Word2Vec 256D.</p>'+svg+'</svg><div class="legend"><span>● Điểm câu</span><span>★ Tâm cụm cuối</span><span>Đường nối = điểm → tâm được gán</span></div></section>';
 }
 
@@ -859,71 +946,53 @@ function kmeans(){
 }
 
 function centroid(){
-  const reps=DATA.representatives,cent=DATA.centroid,steps=cent.process||[];
+  const reps=DATA.representatives,cent=DATA.centroid,rawSteps=cent.process||[];
+  const cosineMode=cent.selection_mode==='cosine';
+  // The UI runs in cosine mode: keep every jump button, detail panel, and ranking table in that same order.
+  const steps=rawSteps.slice().sort((a,b)=>cosineMode
+    ? (Number(b.cosine_score)-Number(a.cosine_score))||(Number(a.index)-Number(b.index))
+    : (Number(a.rank)-Number(b.rank))||(Number(a.index)-Number(b.index)));
+  const orderedRanking=(cent.ranking||[]).slice().sort((a,b)=>cosineMode
+    ? (Number(b.cosine_score)-Number(a.cosine_score))||(Number(a.index)-Number(b.index))
+    : (Number(b.score)-Number(a.score))||(Number(a.index)-Number(b.index)));
   const repRows=reps.map(r=>'<tr><td><b>'+esc(r.id)+'</b></td><td class="sentence">'+esc(r.text)+'</td><td>Cụm '+(r.cluster+1)+'</td><td>'+r.members.map(esc).join(', ')+'</td></tr>');
   const current=steps[Math.min(centroidStep,Math.max(steps.length-1,0))];
-  const overviewRows=cent.ranking.map(x=>'<tr class="'+(x.selected?'won':'')+'"><td>'+esc(x.id)+'</td><td class="sentence">'+esc(x.text)+'</td><td class="num">'+num(x.score,7)+'</td><td class="num">'+num(x.redundancy,7)+'</td><td>'+(x.selected?'<span class="pill">Giữ theo repository</span>':'Bỏ')+'</td><td>'+esc(x.decision)+'</td><td><button type="button" data-centroid-jump="'+(steps.findIndex(s=>s.index===x.index))+'">Xem phép tính</button></td></tr>');
-  let html=cardTitle('03','Chọn câu đại diện và CentroidBow · xem từng thành phần','Trước hết, lấy câu gần tâm K-means nhất trong mỗi cụm. Tiếp đó tính TF/DF/IDF/TF-IDF, tổng hợp vector centroid, chuẩn hóa và áp ngưỡng; sau đó chấm từng câu theo similarity và kiểm tra trùng theo thứ hạng.')+
-    metrics([[reps.length,'câu đại diện từ K-means'],[cent.selected.length,'câu CentroidBow giữ thực tế'],[steps.length,'ứng viên được chấm'],[DATA.mmr.pool.length,'câu vào MMR']])+ 
+  const rankLabel=cosineMode?'Cosine centroid':'Điểm CentroidBow';
+  const overviewRows=orderedRanking.map(x=>{
+    const score=cosineMode?x.cosine_score:x.score;
+    const activeRecord=steps.find(step=>Number(step.index)===Number(x.index));
+    const redundancy=activeRecord?.redundancy;
+    const jumpIndex=steps.findIndex(step=>Number(step.index)===Number(x.index));
+    return '<tr class="'+(x.selected?'won':'')+'"><td><b>'+esc(x.id)+'</b></td><td class="sentence">'+esc(x.text)+'</td><td class="num">'+num(score,7)+'</td><td class="num">'+num(redundancy,7)+'</td><td>'+(x.selected?'<span class="pill">Được giữ</span>':'Loại')+'</td><td>'+esc(x.decision)+'</td><td><button type="button" data-centroid-jump="'+jumpIndex+'">Xem phép tính</button></td></tr>';
+  });
+  let html=cardTitle('03','Chọn câu đại diện và CentroidBow · xem từng thành phần',
+    'Lấy câu đại diện từ các cụm K-means → xây dựng vector chủ đề μ → tính cosine cho mọi ứng viên → xếp hạng giảm dần → lần lượt áp dụng ngưỡng cosine và bộ lọc trùng lặp.')+
+    metrics([[reps.length,'câu đại diện từ K-means'],[cent.selected.length,'câu được giữ để chuyển sang MMR'],[steps.length,'ứng viên được chấm'],[DATA.mmr.pool.length,'câu vào MMR']])+ 
     '<h3>Câu đại diện lấy từ mỗi cụm</h3>'+table(['ID câu gốc','Văn bản','Cụm','Các câu trong cụm'],repRows);
   if(!current)return html+'<div class="note warn">Không có nhật ký chi tiết CentroidBow trả về.</div>';
   const jumpButtons=steps.map((x,i)=>'<button type="button" data-centroid-jump="'+i+'" class="'+(i===centroidStep?'current':(i<centroidStep?'done':''))+'">'+(i+1)+'. '+esc(x.id)+'</button>').join('');
   const termRows=current.terms.map(t=>'<tr><td><b>'+esc(t.term)+'</b></td><td class="num">'+t.tf+'</td><td class="num">'+t.df+'</td><td class="num">'+num(t.idf,7)+'</td><td class="num">'+num(t.tfidf,7)+'</td><td class="num">'+num(t.centroid_sum,7)+'</td><td class="num">'+num(t.centroid_normalized,7)+'</td><td class="num">'+num(t.centroid_after_threshold,7)+'</td></tr>');
-  const comparisonRows=(current.comparisons||[]).map(c=>'<tr class="'+(Number(c.similarity)>Number(cent.threshold)?'rejected':'')+'"><td>'+esc(c.against_id)+'</td><td class="sentence">'+esc(c.against_text)+'</td><td class="num">'+num(c.similarity,7)+'</td><td class="num">'+num(cent.threshold,4)+'</td><td>'+(Number(c.similarity)>Number(cent.threshold)?'<span class="rejected">Vượt ngưỡng → loại</span>':'<span class="passed">Không vượt ngưỡng</span>')+'</td></tr>');
+  const comparisonRows=(current.comparisons||[]).map(c=>'<tr class="'+(Number(c.similarity)>Number(c.threshold??cent.threshold)?'rejected':'')+'"><td>'+esc(c.against_id)+'</td><td class="sentence">'+esc(c.against_text)+'</td><td class="num">'+num(c.similarity,7)+'</td><td class="num">'+num(c.threshold??cent.threshold,4)+'</td><td>'+(Number(c.similarity)>Number(c.threshold??cent.threshold)?'<span class="rejected">Vượt ngưỡng → loại</span>':'<span class="passed">Không vượt ngưỡng</span>')+'</td></tr>');
   const actualNote='<div class="note">'+esc(current.actual_decision_note||'')+'</div>';
-  const finalDecision=current.selected?'<div class="winner-box"><b>✓ Kết quả thực tế: GIỮ '+esc(current.id)+'</b><br>Câu này nằm trong danh sách mà CentroidBow.sumarize() trả về để chuyển sang MMR.<br><span class="small">Giải thích trace: '+esc(current.reason||'')+'</span></div>':'<div class="note warn"><b>Kết quả thực tế: KHÔNG GIỮ '+esc(current.id)+'</b><br>'+esc(current.reason||'Ứng viên không nằm trong kết quả thực tế.')+'</div>';
+  const finalDecision=current.selected
+    ? '<div class="winner-box"><b>✓ Kết quả: GIỮ '+esc(current.id)+'</b><br>'+(cosineMode?'Câu đạt ngưỡng cosine và không trùng quá mức với các câu đã giữ; câu được chuyển sang MMR.':'Câu nằm trong danh sách do CentroidBow gốc chọn.')+'<br><span class="small">Giải thích: '+esc(current.reason||'')+'</span></div>'
+    : '<div class="note warn"><b>Kết quả: LOẠI '+esc(current.id)+'</b><br>'+esc(current.reason||'Ứng viên không nằm trong kết quả được chọn.')+'</div>';
   const fullCentroidRows=(cent.all_centroid_terms||[]).map(t=>'<tr><td>'+esc(t.term)+'</td><td class="num">'+num(t.raw_sum,7)+'</td><td class="num">'+num(t.normalized,7)+'</td><td class="num">'+num(t.after_threshold,7)+'</td><td>'+(Number(t.after_threshold)===0?'<span class="muted">Bị ngưỡng loại</span>':'Được giữ trong centroid')+'</td></tr>');
-  html+='<div class="subhead"><h3>Từng ứng viên theo thứ hạng centroid</h3><span class="small">Ứng viên '+(centroidStep+1)+' / '+steps.length+'</span></div><div class="round-strip">'+jumpButtons+'</div>'+ 
-    '<div class="player"><button id="centroid-first" '+(centroidStep===0?'disabled':'')+'>|← Đầu</button><button id="centroid-prev" '+(centroidStep===0?'disabled':'')+'>← Ứng viên trước</button><span>'+esc(current.id)+' · hạng '+current.rank+'</span><button id="centroid-next" '+(centroidStep===steps.length-1?'disabled':'')+'>Ứng viên tiếp →</button><button id="centroid-last" '+(centroidStep===steps.length-1?'disabled':'')+'>Cuối →|</button></div>'+ 
-    '<div class="query"><b>ỨNG VIÊN ĐANG XÉT</b><b style="font-size:15px;letter-spacing:0;color:var(--ink)">'+esc(current.id)+' · '+esc(current.text)+'</b><div class="small">Hạng '+current.rank+' / '+steps.length+' · điểm từ chính CentroidBow.similarity() = <b>'+num(current.score,8)+'</b></div></div>'+ 
-    '<div class="component-grid"><section class="component-card"><h4>1 · TF: đếm token</h4><p>Số lần token xuất hiện trong câu.</p><div class="formula">TF(t,c) = số lần token t xuất hiện trong câu c</div></section><section class="component-card"><h4>2 · DF và IDF</h4><p>DF đếm số câu có chứa token. IDF được lấy từ TfidfTransformer với smooth_idf=False.</p><div class="formula">IDF(t) = log(N / DF(t)) + 1</div></section><section class="component-card"><h4>3 · TF-IDF</h4><p>Không chuẩn hóa từng dòng và không dùng sublinear TF.</p><div class="formula">TFIDF(t,c) = TF(t,c) × IDF(t)</div></section><section class="component-card"><h4>4 · Vector centroid</h4><p>Cộng TF-IDF của từng token qua tất cả câu đại diện, chuẩn hóa theo giá trị lớn nhất rồi áp ngưỡng topic_threshold.</p><div class="formula">raw(t)=Σc TFIDF(t,c)<br>norm(t)=raw(t)/max(raw)<br>centroid(t)=0 nếu norm(t) ≤ '+num(cent.threshold_topic,4)+'</div></section></div>'+ 
-    '<h3>Chi tiết từng token trong câu này</h3>'+table(['Token','TF','DF','IDF','TF-IDF câu','Tổng TF-IDF corpus','Sau chuẩn hóa','Trọng số sau ngưỡng'],termRows)+
-    '<div class="flow-focus good"><b>Kết quả phép cosine của '+esc(c.id)+'</b>cos(c, μ) = '+num(c.cosine_score,9)+'. Góc giữa hai vector được minh họa bên dưới; xếp hạng sẽ diễn ra sau khi mọi câu đã được tính.</div>'+ 
-    '<details class="details"><summary>Toàn bộ trọng số centroid của vocabulary ('+(cent.all_centroid_terms||[]).length+' token)</summary>'+table(['Token','Tổng raw','Sau chuẩn hóa','Sau ngưỡng','Trạng thái'],fullCentroidRows)+'</details>'+ 
-    '<details class="details"><summary>Mã nguồn similarity() thực tế</summary><pre class="formula" style="white-space:pre-wrap">'+esc(cent.similarity_source||'Không thể đọc source bằng inspect.getsource.')+'</pre></details>'+ 
-    '<h3>Lọc trùng với những câu đã giữ trước ứng viên này</h3><p class="help">Theo thứ hạng giảm dần, so ứng viên hiện tại với từng câu đã được giữ. Nếu similarity lớn hơn ngưỡng, ứng viên bị loại. Nếu bảng trống, chưa có câu trước đó để so.</p>'+ 
-    (current.comparisons&&current.comparisons.length?table(['Câu đã giữ','Nội dung câu đã giữ','Similarity','Ngưỡng','Quyết định so sánh'],comparisonRows):'<div class="note">Chưa có câu nào được giữ trước ứng viên này nên không phát sinh phép so trùng lặp.</div>')+
+  const thisRank=centroidStep+1;
+  html+='<div class="subhead"><h3>'+(cosineMode?'Từng ứng viên theo thứ hạng cosine':'Từng ứng viên theo thứ hạng CentroidBow')+'</h3><span class="small">Hạng '+thisRank+' / '+steps.length+'</span></div><div class="round-strip">'+jumpButtons+'</div>'+ 
+    '<div class="player"><button id="centroid-first" '+(centroidStep===0?'disabled':'')+'>|← Đầu</button><button id="centroid-prev" '+(centroidStep===0?'disabled':'')+'>← Ứng viên trước</button><span>'+esc(current.id)+' · hạng '+thisRank+'</span><button id="centroid-next" '+(centroidStep===steps.length-1?'disabled':'')+'>Ứng viên tiếp →</button><button id="centroid-last" '+(centroidStep===steps.length-1?'disabled':'')+'>Cuối →|</button></div>'+ 
+    '<div class="query"><b>ỨNG VIÊN ĐANG XÉT</b><b style="font-size:15px;letter-spacing:0;color:var(--ink)">'+esc(current.id)+' · '+esc(current.text)+'</b><div class="small">Hạng '+thisRank+' / '+steps.length+' · '+(cosineMode?'cos(<i>x</i><sub>i</sub>, μ)':'CentroidBow.similarity()')+' = <b>'+num(cosineMode?current.cosine_score:current.score,8)+'</b></div></div>'+ 
+    '<div class="component-grid"><section class="component-card"><h4>1 · TF: tần suất token</h4><p>Đếm số lần token <i>t</i> xuất hiện trong câu <i>c</i>.</p><div class="formula math-formula"><span class="eq-line"><span class="math-op">TF</span>(<i>t</i>, <i>c</i>) = số lần <i>t</i> xuất hiện trong <i>c</i></span></div></section><section class="component-card"><h4>2 · DF và IDF</h4><p><i>DF(t)</i> là số câu đại diện có chứa token <i>t</i>; <i>N</i> là số câu đại diện được đưa vào tính TF-IDF.</p><div class="formula math-formula"><span class="eq-line"><span class="math-op">IDF</span>(<i>t</i>) = log <span class="math-frac"><span><i>N</i></span><span><span class="math-op">DF</span>(<i>t</i>)</span></span> + 1</span></div></section><section class="component-card"><h4>3 · TF-IDF</h4><p>TF-IDF ở đây không chuẩn hóa từng dòng và không dùng sublinear TF.</p><div class="formula math-formula"><span class="eq-line"><span class="math-op">TF-IDF</span>(<i>c</i>, <i>t</i>) = <span class="math-op">TF</span>(<i>t</i>, <i>c</i>) × <span class="math-op">IDF</span>(<i>t</i>)</span></div></section><section class="component-card"><h4>4 · Vector chủ đề μ</h4><p>Cộng TF-IDF theo token trên các câu đại diện, chuẩn hóa theo trọng số lớn nhất rồi áp ngưỡng <i>θ</i><sub>topic</sub>.</p><div class="formula math-formula"><span class="eq-line"><i>s</i>(<i>t</i>) = ∑<sub><i>c</i>∈R</sub> <span class="math-op">TF-IDF</span>(<i>c</i>, <i>t</i>)</span><span class="eq-line"><i>w</i>(<i>t</i>) = <span class="math-frac"><span><i>s</i>(<i>t</i>)</span><span>max<sub><i>u</i>∈V</sub> <i>s</i>(<i>u</i>)</span></span></span><span class="eq-line">μ(<i>t</i>) = 0 nếu <i>w</i>(<i>t</i>) ≤ <i>θ</i><sub>topic</sub>; ngược lại μ(<i>t</i>) = <i>w</i>(<i>t</i>)</span></div></section></div>'+ 
+    '<h3>Chi tiết từng token của ứng viên '+esc(current.id)+'</h3>'+table(['Token','TF','DF','IDF','TF-IDF câu','Tổng TF-IDF','Sau chuẩn hóa','Trọng số μ(t)'],termRows)+
+    '<div class="flow-focus good"><b>Cosine của '+esc(current.id)+'</b><span class="math-equation"><span class="eq-line">cos(<i>x</i><sub>i</sub>, μ) = <span class="math-frac"><span><i>x</i><sub>i</sub> · μ</span><span>‖<i>x</i><sub>i</sub>‖<sub>2</sub> ‖μ‖<sub>2</sub></span></span> = '+num(current.cosine_score,9)+'</span></span>Điểm dùng để xếp hạng là cosine trong chế độ hiện tại; sau khi tính đủ mọi câu mới áp dụng ngưỡng và lọc trùng.</div>'+ 
+    '<details class="details"><summary>Toàn bộ trọng số của vector chủ đề μ ('+(cent.all_centroid_terms||[]).length+' token)</summary>'+table(['Token','Tổng s(t)','Trọng số w(t)','Sau ngưỡng μ(t)','Trạng thái'],fullCentroidRows)+'</details>'+ 
+    '<details class="details"><summary>Mã nguồn similarity() của CentroidBow gốc</summary><pre class="formula" style="white-space:pre-wrap">'+esc(cent.similarity_source||'Không thể đọc source bằng inspect.getsource.')+'</pre><p class="small">Hàm này được dùng cho bộ lọc trùng lặp cặp câu; không phải công thức cosine với vector chủ đề μ.</p></details>'+ 
+    '<h3>Lọc trùng với những câu đã giữ trước đó</h3><p class="help">Chỉ ứng viên đạt ngưỡng cosine mới đến bước này. So ứng viên với từng câu đã giữ; nếu <span class="math-equation"><span class="math-op">sim</span>(<i>c</i><sub>i</sub>, <i>s</i><sub>j</sub>) &gt; τ</span> thì loại ứng viên.</p>'+ 
+    (current.comparisons&&current.comparisons.length?table(['Câu đã giữ','Nội dung câu đã giữ','sim(cᵢ, sⱼ)','Ngưỡng τ','Kết quả so sánh'],comparisonRows):'<div class="note">'+esc(current.reason||'Không phát sinh phép so trùng lặp cho ứng viên này.')+'</div>')+
     finalDecision+actualNote+
-    '<h3>Tổng kết tất cả ứng viên</h3>'+table(['ID','Văn bản','Similarity centroid','Redundancy cao nhất','Quyết định thực tế','Lý do','Chi tiết'],overviewRows)+
-    (DATA.mmr.pool.length?'<div class="query"><b>QUERY Q CHUYỂN SANG MMR</b>'+esc(DATA.mmr.pool[0].id)+' · '+esc(DATA.mmr.pool[0].text)+'</div>':'<div class="note warn">Không có câu sau CentroidBow để khởi tạo Q.</div>');
+    '<h3>Tổng kết tất cả ứng viên</h3>'+table(['ID','Văn bản',rankLabel,'Độ trùng cao nhất','Quyết định','Lý do','Chi tiết'],overviewRows)+
+    (DATA.mmr.pool.length?'<div class="query"><b>CÂU ĐẦU VÀO MMR</b>'+esc(DATA.mmr.pool[0].id)+' · '+esc(DATA.mmr.pool[0].text)+'</div>':'<div class="note warn">Không có câu sau Centroid để khởi tạo Q.</div>');
   return html;
-}
-
-function simDetails(d){
-  const top=d.terms.length
-    ?table(['Token chung','tf câu A','tf câu B','IDF','Đóng góp tử số'],d.terms.map(t=>'<tr><td>'+esc(t.word)+'</td><td>'+t.tf1+'</td><td>'+t.tf2+'</td><td class="num">'+num(t.idf,6)+'</td><td class="num">'+num(t.contribution,8)+'</td></tr>'))
-    :'<div class="small">Không có token chung đóng góp vào tử số.</div>';
-  const bottom=table(['Token trong A','tf(A)','IDF','Đóng góp vào mẫu số²'],d.denominator_terms.map(t=>'<tr><td>'+esc(t.word)+'</td><td>'+t.tf1+'</td><td class="num">'+num(t.idf,6)+'</td><td class="num">'+num(t.contribution,8)+'</td></tr>'));
-  return '<div class="metric-row">'+
-    '<div class="metric"><b>'+num(d.numerator,7)+'</b><span>Tử số</span></div>'+
-    '<div class="metric"><b>'+num(d.denominator,7)+'</b><span>Mẫu số sau căn</span></div>'+
-    '<div class="metric"><b>'+num(d.score,7)+'</b><span>sentenceSim(A,B)</span></div></div>'+
-    '<div class="formula">Theo vòng lặp trong repository:<br>tử số = Σ trên từng lần xuất hiện w trong B [tfA(w) × tfB(w) × IDF(w)²]<br>mẫu số = √(Σ trên từng lần xuất hiện w trong A [(tfA(w) × IDF(w))²])</div>'+
-    '<p class="small">Chú ý: vòng lặp chạy qua từng token xuất hiện rồi nhân thêm TF. Vì vậy token lặp được tính lặp lại; đây là cách triển khai thực tế, không phải cosine similarity đối xứng. A và B có thứ tự, không được tự ý đảo hai đối số.</p>'+top+
-    '<details class="details"><summary>Xem các hạng tử của mẫu số trước khi lấy căn</summary>'+bottom+'</details>';
-}
-
-function redComparison(c){
-  if(!c.red_details || !c.red_details.length) return '<div class="small">Tập R chưa có câu để so sánh.</div>';
-  const rows=c.red_details.map(r=>'<tr class="'+(r.is_max?'max-red':'')+'"><td>'+esc(r.against_id)+'</td><td class="num">'+num(r.score,7)+'</td><td>'+(r.is_max?'← Giá trị lớn nhất, dùng làm Red':'Không phải giá trị lớn nhất')+'</td></tr>');
-  return table(['Câu r thuộc R','Sim(c,r)','Vai trò'],rows)+
-    '<div class="mmr-eq">Red(c,R) = max { '+c.red_details.map(r=>num(r.score,7)).join(', ')+' } = '+num(c.red,7)+'</div>'+
-    '<details class="details"><summary>Xem cách tính sentenceSim cho từng cặp trong R</summary>'+c.red_details.map(r=>'<details class="details"><summary>Sim('+esc(c.id)+', '+esc(r.against_id)+') = '+num(r.score,7)+(r.is_max?' · giá trị max':'')+'</summary>'+simDetails(r)+'</details>').join('')+'</details>';
-}
-
-function candidateWalkthrough(c){
-  const lambda=Number(DATA.mmr.lambda);
-  const oneMinus=1-lambda;
-  const mismatch=!c.score_matches_formula;
-  const exactCheck=mismatch
-    ?'<div class="score-mismatch">Điểm tính trực tiếp theo công thức là '+num(c.formula_score,7)+', nhưng MMRScore() của repository trả về '+num(c.score,7)+'. Vì kết quả thực tế được chọn bởi MMRScore(), cần xem đây là khác biệt trong cách triển khai/đối số, không nên âm thầm coi hai điểm là một.</div>'
-    :'<p class="small score-match">✓ Điểm theo công thức khớp với MMRScore() của repository.</p>';
-  return '<details class="details" '+(c.winner?'open':'')+'><summary><b>'+esc(c.id)+'</b> · Rel='+num(c.rel,6)+' · Red='+num(c.red,6)+' · MMR='+num(c.score,6)+(c.winner?' · ★ được chọn':'')+'</summary>'+
-    '<div class="mmr-flow">'+
-      '<section class="mmr-branch rel"><h4>1 · ĐỘ LIÊN QUAN — Rel</h4><p>So sánh ứng viên c với truy vấn Q, theo đúng thứ tự đối số trong code.</p><div class="mmr-eq">Rel('+esc(c.id)+') = sentenceSim('+esc(c.id)+', Q) = '+num(c.rel,7)+'</div>'+simDetails(c.rel_detail)+'</section>'+
-      '<section class="mmr-branch red"><h4>2 · ĐỘ TRÙNG LẶP — Red</h4><p>So sánh c với <b>từng câu r đang có trong R</b>; lấy similarity lớn nhất làm điểm phạt.</p>'+redComparison(c)+'</section>'+
-      '<section class="mmr-branch score"><h4>3 · ĐIỂM MMR</h4><p>Điểm thưởng liên quan trừ điểm phạt trùng lặp.</p><div class="mmr-eq">MMR(c) = λ × Rel − (1−λ) × Red<br>= '+num(lambda,4)+' × '+num(c.rel,7)+' − '+num(oneMinus,4)+' × '+num(c.red,7)+'<br>= '+num(c.formula_score,7)+'</div><p>MMRScore() thực tế = <b>'+num(c.score,7)+'</b></p>'+exactCheck+'</section>'+
-    '</div></details>';
 }
 
 function mmr(){
@@ -972,9 +1041,15 @@ function flowBuild(){
     flowAdd(1,'km-init','K-Means · chọn K tâm ban đầu','K tâm K-means++ xuất hiện dưới dạng hình thoi, khác hình tròn biểu diễn các câu.');
     // The initial state (iteration 0) is already shown in the separate K-means++
     // initialization scene above, so list only real Lloyd iterations here.
-    kmHistory.slice(1).forEach((frame,i)=>flowAdd(1,'km-frame','K-Means · vòng '+(frame.iteration??(i+1))+': gán câu và cập nhật tâm',
-      frame.converged?'Duyệt các câu, cập nhật tâm bằng trung bình vector rồi kiểm tra điều kiện hội tụ.':'Duyệt từng câu, gán vào tâm gần nhất và dịch tâm cụm; nếu chưa hội tụ sẽ lặp tiếp.',
-      {runIndex:kmBestIndex,frameIndex:i+1,kmFrameIndex:i+1}));
+    kmHistory.slice(1).forEach((frame,i)=>{
+      const meta={runIndex:kmBestIndex,frameIndex:i+1,kmFrameIndex:i+1};
+      flowAdd(1,'km-frame','K-Means · vòng '+(frame.iteration??(i+1))+': gán từng câu',
+        'Duyệt từng câu, so khoảng cách tới các tâm và gán câu vào tâm gần nhất theo vector 256D.',meta);
+      flowAdd(1,'km-move','K-Means · vòng '+(frame.iteration??(i+1))+': dịch chuyển tâm',
+        'Xem riêng từng tâm dịch từ vị trí cũ đến trung bình vector mới của các câu trong cụm.',meta);
+    });
+    flowAdd(1,'km-final','K-Means · kết quả cuối và đường nối tâm–điểm',
+      'Hiển thị các cụm cuối cùng, với đường nối mỗi câu tới đúng tâm cụm mà nó được gán vào.');
   }else flowAdd(1,'km-animation','K-Means · phân cụm qua từng vòng','Dùng điều khiển biểu đồ để xem khởi tạo tâm, gán câu, cập nhật tâm và điều kiện hội tụ.');
 
   // Show only the representatives chosen by the real pipeline; do not step through
@@ -984,13 +1059,13 @@ function flowBuild(){
   // Centroid lesson follows the algorithmic order: input -> centroid vector -> all cosine calculations
   // -> rank by cosine -> walk the ranked list and apply the cosine/redundancy thresholds.
   const centroidItems=DATA.centroid.process||[];
-  flowAdd(3,'centroid-overview','Centroid · đầu vào từ các cụm K-means','Nhận các câu đại diện lấy từ cụm K-means và xác định tập câu sẽ được xét.');
-  flowAdd(3,'centroid-vector','Centroid · tính vector chủ đề μ','Cộng TF-IDF của các câu đại diện, chuẩn hóa trọng số token và áp ngưỡng topic_threshold.');
-  flowAdd(3,'centroid-candidate','Centroid · bảng tính cosine của tất cả câu','Một bảng tổng hợp: mỗi câu một dòng, gồm token, TF-IDF, tích vô hướng, chuẩn vector và cosine.');
-  flowAdd(3,'centroid-ranking','Centroid · xếp hạng theo cosine','Sắp xếp tất cả ứng viên theo cosine giảm dần; câu có điểm cao hơn được xét trước, chưa lọc trùng ở bước này.');
+  flowAdd(3,'centroid-overview','Bước 1/5 · Xác định tập câu đầu vào','Chỉ nhận và hiển thị các câu đại diện từ K-means; ở bước này chưa tạo vector chủ đề, chưa tính cosine, chưa xếp hạng và chưa lọc câu.');
+  flowAdd(3,'centroid-vector','Bước 2/5 · Xây dựng vector chủ đề μ','Tính TF-IDF trên tập câu đại diện; cộng trọng số theo token, chuẩn hóa theo giá trị lớn nhất và đặt các trọng số dưới ngưỡng về 0.');
+  flowAdd(3,'centroid-candidate','Bước 3/5 · Tính cosine cho mọi câu','Giữ nguyên thứ tự đầu vào để tính tích vô hướng, chuẩn của từng vector và cosine; bảng tính chi tiết nằm cuối bước này.');
+  flowAdd(3,'centroid-ranking','Bước 4/5 · Xếp hạng theo cosine','Sắp xếp toàn bộ ứng viên theo cosine giảm dần. Đây chỉ là thứ tự ưu tiên, chưa phải danh sách giữ cuối cùng và chưa lọc trùng.');
   (DATA.centroid.ranking||[]).slice().sort((a,b)=>(Number(b.cosine_score)-Number(a.cosine_score))||(Number(a.index)-Number(b.index))).forEach((rankRow,rankIndex)=>{
     const processIndex=centroidItems.findIndex(x=>Number(x.index)===Number(rankRow.index));
-    if(processIndex>=0) flowAdd(3,'centroid-decision','Centroid · xét hạng '+(rankIndex+1)+': '+rankRow.id,'Kiểm tra ngưỡng cosine trước; nếu đạt thì so độ trùng với câu đã giữ rồi quyết định giữ hoặc loại.',{centroidIndex:processIndex,centroidRank:rankIndex});
+    if(processIndex>=0) flowAdd(3,'centroid-decision','Bước 5 · Duyệt hạng '+(rankIndex+1)+'/'+(DATA.centroid.ranking||[]).length+': '+rankRow.id,'Duyệt theo thứ hạng cosine: cosine dưới θ thì loại; đạt θ thì kiểm tra trùng với các câu đã giữ bằng sim(cᵢ, sⱼ) và ngưỡng τ.',{centroidIndex:processIndex,centroidRank:rankIndex});
   });
 
   if(!DATA.mmr.pool.length){
@@ -1063,7 +1138,7 @@ function seedPlot(item){
   let out='<svg class="plot seed-plot" viewBox="0 0 700 390" role="img" aria-label="Các tâm K-means++ được chọn lần lượt"><text x="28" y="24" font-size="12" fill="#63708a">Khởi tạo tâm · đang hiển thị '+shown.length+' / '+seeds.length+' tâm đã chọn</text>';
   out+='<defs><radialGradient id="seedHalo"><stop offset="0" stop-color="#E7C58E" stop-opacity=".30"/><stop offset="1" stop-color="#E7C58E" stop-opacity="0"/></radialGradient></defs>';
   for(const p of pts){out+='<circle cx="'+X(p.x)+'" cy="'+Y(p.y)+'" r="4.2" fill="#C6CDD8" stroke="#fff" stroke-width="1.1"><title>'+esc(p.id+' · '+p.text)+'</title></circle><text x="'+(X(p.x)+8)+'" y="'+(Y(p.y)+4)+'" font-size="8" fill="#79839A">'+esc(p.id)+'</text>';}
-  shown.forEach((idx,j)=>{const p=pts[idx];if(!p)return;const x=X(p.x),y=Y(p.y),color=KM_COLORS[j%KM_COLORS.length],current=j===item.seedPos;if(current)out+='<circle cx="'+x+'" cy="'+y+'" r="23" fill="url(#seedHalo)" class="point-halo"></circle>';out+='<path class="seed-marker" d="'+starPath(x,y,8.5,3.8)+'" fill="'+color+'" stroke="'+(current?'#E6C98E':'#fff')+'" stroke-width="'+(current?'2.1':'1.2')+'"><title>μ'+(j+1)+' = '+esc(p.id)+(current?' · tâm vừa được chọn':' · tâm đã có')+'</title></path><text x="'+(x+10)+'" y="'+(y-8)+'" font-size="10" font-weight="800" fill="#68728A">μ'+(j+1)+'</text>';});
+  shown.forEach((idx,j)=>{const p=pts[idx];if(!p)return;const x=X(p.x),y=Y(p.y),color=KM_COLORS[j%KM_COLORS.length],current=j===item.seedPos;if(current)out+='<circle cx="'+x+'" cy="'+y+'" r="23" fill="url(#seedHalo)" class="point-halo"></circle>';out+='<path class="seed-marker" d="'+starPath(x,y,8.5,3.8)+'" fill="'+color+'" stroke="'+(current?'#E6C98E':'#fff')+'" stroke-width="'+(current?'2.1':'1.2')+'"><title>Tâm '+(j+1)+' = '+esc(p.id)+(current?' · tâm vừa được chọn':' · tâm đã có')+'</title></path><text x="'+(x+10)+'" y="'+(y-8)+'" font-size="10" font-weight="800" fill="#68728A">'+(j+1)+'</text>';});
   out+='</svg><div class="legend"><span>● câu chưa chọn làm tâm</span><span>★ tâm đã chọn</span><span>★ viền vàng nhạt: tâm vừa được chọn</span><span>PCA 2D chỉ để hiển thị; chọn tâm theo vector Word2Vec 256 chiều</span></div>';
   return out;
 }
@@ -1157,19 +1232,104 @@ function kmSvgBase(frame,phase,cursor,pointPhase='focus'){
     if(phase==='update'&&after[j]){
       const nx=X(after[j].x),ny=Y(after[j].y);
       out+='<line class="km-center-move" x1="'+x+'" y1="'+y+'" x2="'+nx+'" y2="'+ny+'" stroke="'+color+'" stroke-width="1.7" marker-end="url(#km-arrow-new)"/>';
-      out+='<circle class="km-center-old" cx="'+x+'" cy="'+y+'" r="12" fill="white" stroke="'+color+'" stroke-width="1.8"><title>Tâm cũ μ'+(j+1)+'</title></circle>';
-      out+='<path d="'+starPath(nx,ny,9.5,4.1)+'" fill="'+color+'" opacity=".22" stroke="'+color+'" stroke-width="1.1" stroke-dasharray="3 3"><title>Vị trí mới của tâm μ'+(j+1)+'</title></path>';
-      out+='<g class="km-center-new-group"><animateTransform attributeName="transform" type="translate" from="'+x+' '+y+'" to="'+nx+' '+ny+'" dur="1.15s" calcMode="spline" keySplines="0.22 1 0.36 1" fill="freeze"/><path class="km-center-moving-star" d="'+starPath(0,0,9.5,4.1)+'" fill="'+color+'" stroke="white" stroke-width="1.4"><title>Tâm mới μ'+(j+1)+'</title></path><text x="11" y="-9" fill="#68728A" font-size="10" font-weight="800">μ'+(j+1)+' mới</text></g>';
-      out+='<text x="'+(x+11)+'" y="'+(y+15)+'" fill="'+color+'" font-size="10" opacity=".7">μ'+(j+1)+' cũ</text>';
+      out+='<circle class="km-center-old" cx="'+x+'" cy="'+y+'" r="12" fill="white" stroke="'+color+'" stroke-width="1.8"><title>Tâm cũ '+(j+1)+'</title></circle>';
+      out+='<path d="'+starPath(nx,ny,9.5,4.1)+'" fill="'+color+'" opacity=".22" stroke="'+color+'" stroke-width="1.1" stroke-dasharray="3 3"><title>Vị trí mới của tâm '+(j+1)+'</title></path>';
+      out+='<g class="km-center-new-group"><animateTransform attributeName="transform" type="translate" from="'+x+' '+y+'" to="'+nx+' '+ny+'" dur="1.15s" calcMode="spline" keySplines="0.22 1 0.36 1" fill="freeze"/><path class="km-center-moving-star" d="'+starPath(0,0,9.5,4.1)+'" fill="'+color+'" stroke="white" stroke-width="1.4"><title>Tâm mới '+(j+1)+'</title></path><text x="11" y="-9" fill="#68728A" font-size="10" font-weight="800">'+(j+1)+' mới</text></g>';
+      out+='<text x="'+(x+11)+'" y="'+(y+15)+'" fill="'+color+'" font-size="10" opacity=".7">'+(j+1)+' cũ</text>';
     }else{
       if(isFresh)out+='<circle class="km-seed-pulse" cx="'+x+'" cy="'+y+'" r="14"/>';
-      out+='<path class="'+(isFresh?'km-center-new':'km-center-still')+'" d="'+starPath(x,y,9.5,4.1)+'" fill="'+color+'" stroke="white" stroke-width="1.4"><title>Tâm cụm μ'+(j+1)+'</title></path>';
-      out+='<text x="'+(x+13)+'" y="'+(y-10)+'" fill="#68728A" font-size="10" font-weight="800">μ'+(j+1)+'</text>';
+      out+='<path class="'+(isFresh?'km-center-new':'km-center-still')+'" d="'+starPath(x,y,9.5,4.1)+'" fill="'+color+'" stroke="white" stroke-width="1.4"><title>Tâm cụm '+(j+1)+'</title></path>';
+      out+='<text x="'+(x+13)+'" y="'+(y-10)+'" fill="#68728A" font-size="10" font-weight="800">'+(j+1)+'</text>';
     }
   });
   out+='</svg><div class="km-legend"><span><i></i>Câu chưa gán</span><span><i style="background:'+KM_COLORS[0]+'"></i>Màu cụm được chọn</span><span><i class="center"></i>Tâm cụm ★</span><span><i class="old"></i>Vị trí tâm cũ</span><span>Nhãn d = khoảng cách thật trong vector Word2Vec 256D</span><span>Độ dài hình học của cạnh vẫn là hình chiếu PCA 2D.</span></div>';
   return out;
 }
+function kmMovementSvg(frame, activeCluster){
+  const pts=DATA.sentences||[],oldCenters=frame.centers||[],newCenters=frame.centers_after||oldCenters;
+  const k=Math.max(oldCenters.length,newCenters.length),assign=frame.assignments||[];
+  if(!k)return '<div class="note warn">Không có tâm cụm để vẽ.</div>';
+  const allX=pts.map(p=>Number(p.x)).concat(oldCenters.map(c=>Number(c.x)),newCenters.map(c=>Number(c.x)));
+  const allY=pts.map(p=>Number(p.y)).concat(oldCenters.map(c=>Number(c.y)),newCenters.map(c=>Number(c.y)));
+  const X=pcaProjector(allX,allY,52,43,660,325).x,Y=pcaProjector(allX,allY,52,43,660,325).y;
+  const j=Math.max(0,Math.min(activeCluster,k-1)),old=oldCenters[j],next=newCenters[j]||old;
+  const color=KM_COLORS[j%KM_COLORS.length];
+  let out='<svg class="km-lesson-svg" viewBox="0 0 760 420" role="img" aria-label="Dịch chuyển riêng tâm cụm '+(j+1)+'">';
+  for(let g=0;g<5;g++){
+    const gx=52+660*g/4,gy=43+325*g/4;
+    out+='<line x1="'+gx+'" y1="43" x2="'+gx+'" y2="368" stroke="#F0F2F8" stroke-width=".8"/><line x1="52" y1="'+gy+'" x2="712" y2="'+gy+'" stroke="#F0F2F8" stroke-width=".8"/>';
+  }
+  out+='<text x="16" y="20" fill="#6E7890" font-size="10">Vòng '+esc(frame.iteration??'—')+' · tâm đang xem '+(j+1)+' / '+k+' · hình chiếu PCA 2D</text>';
+  // Plot sentence points; emphasise members of the selected cluster and mute other clusters.
+  pts.forEach((p,i)=>{
+    const cl=Number(assign[Number(p.index??i)]??0),selected=cl===j,x=X(p.x),y=Y(p.y),c=KM_COLORS[cl%KM_COLORS.length];
+    out+='<circle cx="'+x+'" cy="'+y+'" r="'+(selected?'5':'3.4')+'" fill="'+c+'" opacity="'+(selected?'.95':'.20')+'" stroke="#fff" stroke-width="1"><title>'+esc(p.id+' · cụm '+(cl+1))+'</title></circle>';
+    if(selected)out+='<text x="'+(x+8)+'" y="'+(y-8)+'" font-size="9" font-weight="700" fill="#263653" paint-order="stroke" stroke="#fff" stroke-width="3">'+esc(p.id)+'</text>';
+  });
+  // Other centers stay as muted reference marks; only the active center is animated.
+  oldCenters.forEach((c,idx)=>{
+    if(idx===j)return;const x=X(c.x),y=Y(c.y),cc=KM_COLORS[idx%KM_COLORS.length];
+    out+='<path d="'+starPath(x,y,6,2.6)+'" fill="'+cc+'" opacity=".25"/><text x="'+(x+8)+'" y="'+(y-7)+'" font-size="9" fill="#8790A3" opacity=".55">'+(idx+1)+'</text>';
+  });
+  if(old&&next){
+    const x=X(old.x),y=Y(old.y),nx=X(next.x),ny=Y(next.y),distance=Math.hypot(Number(next.x)-Number(old.x),Number(next.y)-Number(old.y));
+    out+='<defs><marker id="km-move-arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="'+color+'"/></marker></defs>';
+    if(distance>1e-9)out+='<line class="km-center-move" x1="'+x+'" y1="'+y+'" x2="'+nx+'" y2="'+ny+'" stroke="'+color+'" stroke-width="2.4" marker-end="url(#km-move-arrow)" opacity=".95"><title>Tâm dịch từ vị trí cũ tới trung bình vector mới</title></line>';
+    out+='<circle cx="'+x+'" cy="'+y+'" r="12" fill="#fff" stroke="'+color+'" stroke-width="2" stroke-dasharray="4 3" opacity=".75"><title>Tâm cũ '+(j+1)+'</title></circle>';
+    out+='<path d="'+starPath(nx,ny,13,5.2)+'" fill="'+color+'" stroke="#fff" stroke-width="1.8"><title>Tâm mới '+(j+1)+'</title></path>';
+    out+='<text x="'+(x+13)+'" y="'+(y+18)+'" font-size="10" font-weight="800" fill="#5D6882" paint-order="stroke" stroke="#fff" stroke-width="3">'+(j+1)+' cũ</text>';
+    out+='<text x="'+(nx+14)+'" y="'+(ny-12)+'" font-size="11" font-weight="900" fill="#202B50" paint-order="stroke" stroke="#fff" stroke-width="3.5">'+(j+1)+' mới</text>';
+  }
+  return out+'</svg><div class="km-legend"><span><i style="background:'+color+'"></i>Điểm thuộc cụm '+(j+1)+'</span><span><i class="old"></i>Tâm cũ</span><span><i class="center"></i>Tâm mới</span><span>Nét màu chỉ hướng dịch chuyển của tâm đang xét.</span></div>';
+}
+function kmMoveRefresh(){
+  if(!kmMoveState)return;const st=kmMoveState,host=$('km-move-stage'),centers=st.frame.centers_after||st.frame.centers||[],k=centers.length;
+  if(!host)return;
+  host.innerHTML=kmMovementSvg(st.frame,st.clusterIndex);
+  const u=(st.frame.cluster_updates||[]).find(x=>Number(x.cluster)===Number(st.clusterIndex));
+  const shift=Number(u?.shift_sq??0),status=$('km-move-status'),metric=$('km-move-metric'),title=$('km-move-title'),body=$('km-move-text');
+  if(status)status.textContent='DỊCH TÂM μ'+(st.clusterIndex+1)+' / '+k;
+  if(metric)metric.textContent='μ'+(st.clusterIndex+1)+' · '+num(shift,8);
+  if(title)title.textContent='Tâm cụm '+(st.clusterIndex+1)+': vị trí cũ → vị trí mới';
+  if(body)body.textContent=shift>1e-12?'Tâm mới được tính bằng trung bình vector các câu đã gán vào cụm này. Đường màu chỉ biểu diễn hướng dịch chuyển trên hình chiếu PCA; phép tính thực tế dùng vector 256 chiều.':'Tâm này gần như không dịch chuyển ở vòng hiện tại (dịch tâm² = '+num(shift,10)+').';
+  const prev=$('km-move-prev'),next=$('km-move-next'),play=$('km-move-play');
+  if(prev)prev.disabled=st.clusterIndex<=0;
+  if(next)next.textContent=st.clusterIndex>=k-1?'Hoàn tất bước →':'Tâm tiếp →';
+  if(play)play.textContent=st.running?'⏸ Tạm dừng':(st.clusterIndex>=k-1?'↻ Xem lại tâm':'▶ Tự xem lần lượt');
+}
+function kmMoveStopTimer(){if(kmMoveTimer){clearTimeout(kmMoveTimer);kmMoveTimer=null;}}
+function kmMoveTick(){
+  const st=kmMoveState;if(!st||!st.running)return;
+  const k=(st.frame.centers_after||st.frame.centers||[]).length;
+  if(st.clusterIndex<k-1){st.clusterIndex++;kmMoveRefresh();kmMoveTimer=setTimeout(kmMoveTick,1050);}
+  else{st.running=false;kmMoveTimer=null;kmMoveRefresh();}
+}
+function kmMovePlay(){
+  if(!kmMoveState)return;const st=kmMoveState;
+  if(st.running){st.running=false;kmMoveStopTimer();kmMoveRefresh();return;}
+  if(st.clusterIndex>=(st.frame.centers_after||st.frame.centers||[]).length-1)st.clusterIndex=0;
+  st.running=true;kmMoveRefresh();kmMoveTimer=setTimeout(kmMoveTick,500);
+}
+function kmMovePrev(){if(!kmMoveState)return;kmMoveState.running=false;kmMoveStopTimer();kmMoveState.clusterIndex=Math.max(0,kmMoveState.clusterIndex-1);kmMoveRefresh();}
+function kmMoveNext(){
+  if(!kmMoveState)return;const st=kmMoveState;st.running=false;kmMoveStopTimer();
+  const k=(st.frame.centers_after||st.frame.centers||[]).length;
+  if(st.clusterIndex<k-1){st.clusterIndex++;kmMoveRefresh();}
+  else flowGo(flowIndex+1);
+}
+function kmMovementStep(item){
+  const frame=kmSceneFrame(item);if(!frame)return '<div class="note warn">Không có nhật ký dịch chuyển tâm ở vòng này.</div>';
+  const k=(frame.centers_after||frame.centers||[]).length;
+  const rows=(frame.cluster_updates||[]).map(u=>'<tr><td>μ'+(Number(u.cluster)+1)+'</td><td>'+Number(u.count||0)+'</td><td class="num">'+num(u.shift_sq,9)+'</td><td class="small">'+((u.members||[]).map(i=>esc(DATA.sentences[i]?.id||('C'+(i+1)))).join(', ')||'—')+'</td></tr>');
+  return '<div class="km-lesson-shell"><div class="km-lesson-toolbar"><button type="button" id="km-move-prev">← Tâm trước</button><button type="button" class="km-primary" id="km-move-play">▶ Tự xem lần lượt</button><button type="button" id="km-move-next">Tâm tiếp →</button></div><div class="km-lesson-status" id="km-move-status">Dịch tâm μ1 / '+k+'</div><div class="km-lesson-stage" id="km-move-stage">'+kmMovementSvg(frame,0)+'</div><div class="km-lesson-explain"><div><b id="km-move-title">Tâm cụm 1: vị trí cũ → vị trí mới</b><p id="km-move-text">Tâm mới là trung bình các vector của những câu được gán vào cụm. Đường màu biểu diễn hướng dịch chuyển trên PCA 2D.</p></div><div class="km-lesson-metric" id="km-move-metric">μ1</div></div></div><div class="flow-equation">Cập nhật tâm: <span class="math-equation">μ<sub>j</sub><sup>(t+1)</sup> = (1 / |C<sub>j</sub>|) ∑<sub>xᵢ ∈ Cⱼ</sub> xᵢ</span><br>Chỉ biểu diễn một tâm tại mỗi lượt bấm để dễ quan sát. Bấm “Tâm tiếp” để lần lượt xem đủ '+k+' tâm.</div><h3>Nhật ký dịch chuyển của các tâm vòng '+esc(frame.iteration??item.frameIndex)+'</h3>'+table(['Tâm','Số câu dùng để cập nhật','Tổng dịch tâm²','Các câu thuộc cụm'],rows)+'<div class="metric-row">'+metrics([[num(frame.shift,8),'tổng dịch tâm² trong vòng'],[num(frame.inertia,7),'inertia'],[frame.converged?'ĐÃ HỘI TỤ':'TIẾP TỤC','trạng thái sau vòng']])+'</div><div class="flow-result '+(frame.converged?'good':'')+'"><b>'+(frame.converged?'✓ Đạt điều kiện dừng':'→ Chuyển sang vòng Lloyd tiếp theo')+'</b><br>'+esc(frame.convergence_reason||'')+'</div><div class="note">Độ dịch chuyển được tính từ vector 256 chiều. Khoảng dịch trên sơ đồ chỉ là hình chiếu PCA 2D.</div>';
+}
+function bindKmMoveControls(item){
+  kmMoveStopTimer();const frame=kmSceneFrame(item);if(!frame)return;
+  kmMoveState={item,frame,clusterIndex:0,running:false};
+  $('km-move-prev')?.addEventListener('click',kmMovePrev);$('km-move-play')?.addEventListener('click',kmMovePlay);$('km-move-next')?.addEventListener('click',kmMoveNext);
+  kmMoveRefresh();
+}
+
 function kmPointsStep(){
   const pts=DATA.sentences||[];
   return '<div class="km-lesson-shell"><div class="km-lesson-stage">'+kmSvgBase(null,'points',-1)+'</div><div class="km-lesson-explain"><div><b>Các điểm câu</b><p>Chấm tròn là câu; vị trí là PCA 2D để dễ nhìn.</p></div><div class="km-lesson-metric">'+pts.length+' điểm</div></div></div>';
@@ -1182,8 +1342,7 @@ function kmInitStep(){
 }
 function kmTeachingFrameStep(item){
   const frame=kmSceneFrame(item);if(!frame)return '<div class="note warn">Không có dữ liệu cho vòng K-Means này.</div>';
-  const isInit=(item.frameIndex||0)===0;
-  return '<div class="km-lesson-shell"><div class="km-lesson-toolbar"><button type="button" id="km-lesson-prev">← Trước</button><button type="button" class="km-primary" id="km-lesson-play">⏸ Tạm dừng</button><button type="button" id="km-lesson-next">Tiếp →</button></div><div class="km-lesson-status" id="km-lesson-status">Chuẩn bị điểm đầu tiên…</div><div class="km-lesson-stage" id="km-lesson-stage">'+kmSvgBase(frame,'sweep',0,'focus')+'</div><div class="km-lesson-explain"><div><b id="km-lesson-explain-title">Duyệt từng điểm</b><p id="km-lesson-explain-text">Điểm đang xét sẽ nối tới các tâm, hiện khoảng cách rồi đổi màu theo tâm gần nhất.</p></div><div class="km-lesson-metric" id="km-lesson-metric">1 / '+DATA.sentences.length+'</div></div></div><div class="flow-equation">Gán cụm: cᵢ = argminⱼ d²(xᵢ, μⱼ)<br>Cập nhật tâm: μⱼ mới = trung bình vector các câu trong cụm j.</div><div class="metric-row">'+metrics([[num(frame.shift,7),'dịch tâm²'],[num(frame.inertia,7),'inertia'],[frame.converged?'ĐÃ HỘI TỤ':'TIẾP TỤC','trạng thái']])+'</div><div class="flow-result '+(frame.converged?'good':'')+'"><b>'+(frame.converged?'Đã hội tụ':(isInit?'Bắt đầu vòng Lloyd':'Sang vòng kế tiếp'))+'</b><br>'+esc(frame.convergence_reason||'')+'</div>';
+  return '<div class="km-lesson-shell"><div class="km-lesson-toolbar"><button type="button" id="km-lesson-prev">← Trước</button><button type="button" class="km-primary" id="km-lesson-play">⏸ Tạm dừng</button><button type="button" id="km-lesson-next">Tiếp →</button></div><div class="km-lesson-status" id="km-lesson-status">Chuẩn bị điểm đầu tiên…</div><div class="km-lesson-stage" id="km-lesson-stage">'+kmSvgBase(frame,'sweep',0,'focus')+'</div><div class="km-lesson-explain"><div><b id="km-lesson-explain-title">Duyệt từng điểm</b><p id="km-lesson-explain-text">Điểm đang xét sẽ nối tới các tâm, hiện khoảng cách rồi đổi màu theo tâm gần nhất.</p></div><div class="km-lesson-metric" id="km-lesson-metric">1 / '+DATA.sentences.length+'</div></div></div><div class="flow-equation">Gán cụm: <span class="math-equation">cᵢ = arg min<sub>j</sub> d²(xᵢ, μⱼ)</span><br>Ở bước này chỉ xem việc gán câu. Việc cập nhật và dịch chuyển tâm được tách sang bước tiếp theo.</div><div class="flow-focus"><b>Điều cần quan sát</b>Câu được tô màu theo tâm gần nhất dựa trên khoảng cách của vector Word2Vec 256 chiều; hình vẽ PCA 2D chỉ dùng để minh họa.</div>';
 }
 function kmFrameHasMovement(frame){return Number(frame?.shift||0)>1e-12||(frame?.cluster_updates||[]).some(u=>Number(u.shift_sq||0)>1e-12);}
 function kmLessonStopTimer(){if(kmLessonTimer){clearTimeout(kmLessonTimer);kmLessonTimer=null;}}
@@ -1212,9 +1371,9 @@ function kmLessonRefresh(){
     title='Tâm cụm di chuyển';text='Vị trí cũ mờ dần; tâm mới hiện ở đích rồi trượt tới trung bình của cụm.';
     status='CẬP NHẬT TÂM';metric='μ cũ → μ mới';
   }else{
-    title=st.frame.converged?'Đã hội tụ':(Number(st.frame.iteration)===0?'Hoàn tất khởi tạo':'Hoàn tất vòng '+st.frame.iteration);
-    text=st.frame.converged?'Đạt điều kiện dừng.':'Tâm đã cập nhật; tiếp tục nếu chưa hội tụ.';
-    status=st.frame.converged?'✓ HỘI TỤ':(Number(st.frame.iteration)===0?'✓ XONG KHỞI TẠO':'✓ XONG VÒNG '+st.frame.iteration);metric=st.frame.converged?'DỪNG':'TIẾP';
+    title='Đã gán cụm cho toàn bộ điểm';
+    text='Bước gán cụm đã hoàn tất. Sang bước kế tiếp để xem riêng từng tâm dịch chuyển từ vị trí cũ đến vị trí mới.';
+    status='✓ XONG GÁN CỤM';metric=total+' / '+total;
   }
   if($('km-lesson-explain-title'))$('km-lesson-explain-title').textContent=title;
   if($('km-lesson-explain-text'))$('km-lesson-explain-text').textContent=text;
@@ -1224,8 +1383,8 @@ function kmLessonRefresh(){
   const prev=$('km-lesson-prev'),next=$('km-lesson-next'),play=$('km-lesson-play');
   if(prev)prev.disabled=st.phase==='sweep'&&st.cursor===0&&st.pointPhase==='focus';
   if(next){
-    if(st.phase==='sweep')next.textContent=st.pointPhase==='focus'?'Khoảng cách →':(st.pointPhase==='measure'?'Gán màu →':(st.cursor<total-1?'Điểm tiếp →':(kmFrameHasMovement(st.frame)?'Dịch tâm →':'Xong vòng →')));
-    else next.textContent=st.phase==='update'?'Kết thúc cập nhật →':'Vòng tiếp →';
+    if(st.phase==='sweep')next.textContent=st.pointPhase==='focus'?'Khoảng cách →':(st.pointPhase==='measure'?'Gán màu →':(st.cursor<total-1?'Điểm tiếp →':'Xong gán cụm →'));
+    else next.textContent='Sang bước dịch tâm →';
   }
   if(play)play.textContent=st.running?'⏸ Tạm dừng':(st.phase==='complete'?'↻ Chạy lại':'▶ Chạy hoạt ảnh');
 }
@@ -1235,7 +1394,6 @@ function kmLessonTick(){
     if(st.pointPhase==='focus')st.pointPhase='measure';
     else if(st.pointPhase==='measure')st.pointPhase='assigned';
     else if(st.cursor<(DATA.sentences||[]).length-1){st.cursor++;st.pointPhase='focus';}
-    else if(kmFrameHasMovement(st.frame))st.phase='update';
     else st.phase='complete';
   }else if(st.phase==='update')st.phase='complete';
   else{st.running=false;kmLessonTimer=null;kmLessonRefresh();return;}
@@ -1266,7 +1424,6 @@ function kmLessonNext(){
     if(st.pointPhase==='focus')st.pointPhase='measure';
     else if(st.pointPhase==='measure')st.pointPhase='assigned';
     else if(st.cursor<(DATA.sentences||[]).length-1){st.cursor++;st.pointPhase='focus';}
-    else if(kmFrameHasMovement(st.frame))st.phase='update';
     else st.phase='complete';
   }else if(st.phase==='update')st.phase='complete';
   else{flowGo(flowIndex+1);return;}
@@ -1507,7 +1664,7 @@ function representativeStep(item){
   svg+='<div class="legend"><span><i class="dot" style="background:'+color+'"></i>Điểm thuộc cụm '+(Number(r.cluster)+1)+'</span><span>★ tâm cụm</span><span>★ câu được pipeline chọn</span><span>Nhãn d trên cạnh = khoảng cách Euclid thật 256D; độ dài và tọa độ đường vẫn là hình chiếu PCA 2D.</span></div>';
   const outside=!r.selected_in_cluster;
   const distanceRows=members.map(c=>{const pt=points[Number(c.index)],pcaDistance=pt?Math.hypot(Number(pt.x)-Number(center.x),Number(pt.y)-Number(center.y)):NaN;return '<tr><td><b>'+esc(c.id)+'</b></td><td class="num">'+num(pcaDistance,5)+'</td><td class="num">'+num(c.distance,9)+'</td><td>'+(Number(c.index)===Number(r.selected_index)?'<span class="pill">★ Được chọn</span>':'')+'</td></tr>';});
-  return '<div class="flow-equation">Câu đại diện = argminᵢ ||xᵢ − μ'+(Number(r.cluster)+1)+'||₂</div><div class="flow-focus"><b>Tâm cụm đang xét: μ'+(Number(r.cluster)+1)+'</b>Nhãn trên từng cạnh hiển thị khoảng cách Euclid thật trong vector 256D. PCA chỉ quyết định vị trí điểm trên hình, vì vậy độ dài cạnh không nhất thiết tỉ lệ với con số d.</div><section class="centroid-pipeline"><h3>Khoảng cách trong cụm và câu được chọn</h3>'+svg+rowTable(['Câu','Khoảng cách PCA 2D','Khoảng cách thật 256D','Trạng thái'],distanceRows)+'</section><div class="flow-result"><b>Đại diện thực tế: '+esc(r.selected_id)+'</b><br>d = '+num(r.selected_distance,9)+'. '+(outside?'Lưu ý: theo logic repository hiện tại, phép tìm gần tâm đang xét trên toàn bộ câu nên node được chọn nằm ngoài cụm; node vẫn được đánh dấu ★ nhưng không nối cạnh để giữ đúng yêu cầu chỉ nối các điểm thuộc cụm.':'Câu được chọn thuộc cụm đang xét và có khoảng cách nhỏ nhất theo phép chọn của pipeline.')+'</div>';
+  return '<div class="flow-equation math-equation"><span class="eq-line">i<sub>'+(Number(r.cluster)+1)+'</sub><sup>*</sup> = arg min<sub>i</sub> ‖<i>x</i><sub>i</sub> − μ<sub>'+(Number(r.cluster)+1)+'</sub>‖<sub>2</sub></span></div><div class="flow-focus"><b>Tâm cụm đang xét: μ'+(Number(r.cluster)+1)+'</b>Nhãn trên từng cạnh hiển thị khoảng cách Euclid thật trong vector 256D. PCA chỉ quyết định vị trí điểm trên hình, vì vậy độ dài cạnh không nhất thiết tỉ lệ với con số d.</div><section class="centroid-pipeline"><h3>Khoảng cách trong cụm và câu được chọn</h3>'+svg+rowTable(['Câu','Khoảng cách PCA 2D','Khoảng cách thật 256D','Trạng thái'],distanceRows)+'</section><div class="flow-result"><b>Đại diện thực tế: '+esc(r.selected_id)+'</b><br>d = '+num(r.selected_distance,9)+'. '+(outside?'Lưu ý: theo logic repository hiện tại, phép tìm gần tâm đang xét trên toàn bộ câu nên node được chọn nằm ngoài cụm; node vẫn được đánh dấu ★ nhưng không nối cạnh để giữ đúng yêu cầu chỉ nối các điểm thuộc cụm.':'Câu được chọn thuộc cụm đang xét và có khoảng cách nhỏ nhất theo phép chọn của pipeline.')+'</div>';
 }
 function centroidVectorStep(){
   const cent=DATA.centroid,meta={};(cent.process||[]).forEach(c=>(c.terms||[]).forEach(t=>{if(!meta[t.term])meta[t.term]=t;}));
@@ -1515,23 +1672,27 @@ function centroidVectorStep(){
   const rows=allTerms.map(t=>{const m=meta[t.term]||{};return '<tr><td><b>'+esc(t.term)+'</b></td><td class="num">'+(m.df??'—')+'</td><td class="num">'+num(m.idf,7)+'</td><td class="num">'+num(t.raw_sum,7)+'</td><td class="num">'+num(t.normalized,7)+'</td><td class="num">'+num(t.after_threshold,7)+'</td><td>'+(Number(t.after_threshold)===0?'Bị ngưỡng loại':'Giữ trong vector')+'</td></tr>';});
   const top=allTerms.slice().sort((a,b)=>Number(b.after_threshold)-Number(a.after_threshold)).slice(0,18);
   const bars='<div class="mmr-bars">'+top.map(t=>{const v=Math.max(0,Math.min(1,Number(t.after_threshold)||0));return '<div class="mmr-bar-row '+(v>0?'winner':'')+'"><div class="mmr-bar-label">'+esc(t.term)+'</div><div class="mmr-bar-track"><div class="mmr-bar-fill" style="width:'+(v*100)+'%"></div></div><div class="mmr-bar-value">'+num(v,5)+'</div></div>';}).join('')+'</div>';
-  return graphFlow([{title:'TF-IDF từng câu',body:'TF × IDF cho mỗi token.'},{title:'Cộng theo token',body:'Tạo trọng số chủ đề raw(t).'}, {title:'Chuẩn hóa',body:'raw(t) / max(raw).'}, {title:'Áp ngưỡng token',body:'Đặt μ(t)=0 nếu normalized ≤ topic_threshold.',kind:'primary-node'}])+
-    '<div class="flow-equation">TFIDF(t,c) = TF(t,c) × IDF(t)<br>raw(t) = Σc TFIDF(t,c)<br>normalized(t) = raw(t) / max(raw)<br>μ(t) = 0 nếu normalized(t) ≤ '+num(cent.threshold_topic,5)+'; ngược lại μ(t)=normalized(t)</div>'+
-    '<div class="metric-row">'+metrics([[(cent.all_centroid_terms||[]).length,'token trong vocabulary'],[num(cent.threshold_topic,3),'ngưỡng topic_threshold'],[num(cent.threshold,3),'ngưỡng lọc trùng'],[cent.selection_mode==='cosine'?'Cosine + θ':'CentroidBow gốc','chế độ chọn câu'],[num(cent.cosine_threshold,3),'ngưỡng cosine']])+'</div>'+
-    '<section class="centroid-pipeline"><h3>Biểu đồ trọng số của vector chủ đề μ</h3><p class="small">Các thanh dài hơn biểu thị token có trọng số lớn hơn sau khi chuẩn hóa và áp ngưỡng. Hiển thị tối đa 18 token có trọng số cao nhất.</p>'+bars+'</section>'+
-    flowCaption('Mỗi token được tổng hợp qua toàn bộ câu đại diện','DF/IDF lấy từ CountVectorizer và TfidfTransformer trong pipeline')+
-    rowTable(['Token','DF','IDF','Tổng TF-IDF raw','Sau chuẩn hóa','Sau ngưỡng','Vai trò'],rows)+
-    '<div class="note">Sau khi tạo μ, lần lượt tính cosine cho tất cả ứng viên; chỉ sau đó mới xếp hạng giảm dần, áp ngưỡng cosine và kiểm tra trùng lặp.</div>';
+  return graphFlow([{title:'Tính TF-IDF',body:'Tạo trọng số TF-IDF cho từng token trong mỗi câu đại diện.'},{title:'Cộng theo token',body:'Cộng TF-IDF của token t qua toàn bộ câu đại diện.'},{title:'Chuẩn hóa',body:'Chia cho tổng trọng số lớn nhất trong vocabulary.'},{title:'Áp ngưỡng θtopic',body:'Nếu w(t) ≤ θtopic thì μ(t)=0; nếu không thì μ(t)=w(t).',kind:'primary-node'}])+
+    '<div class="flow-equation math-equation"><span class="eq-line"><span class="math-op">TF-IDF</span>(<i>c</i>, <i>t</i>) = <span class="math-op">TF</span>(<i>t</i>, <i>c</i>) × <span class="math-op">IDF</span>(<i>t</i>)</span><span class="eq-line"><i>s</i>(<i>t</i>) = ∑<sub><i>c</i>∈R</sub> <span class="math-op">TF-IDF</span>(<i>c</i>, <i>t</i>)</span><span class="eq-line"><i>w</i>(<i>t</i>) = <span class="math-frac"><span><i>s</i>(<i>t</i>)</span><span>max<sub><i>u</i>∈V</sub> <i>s</i>(<i>u</i>)</span></span></span><span class="eq-line">μ(<i>t</i>) = <span class="math-piecewise"><span class="brace">{</span><span class="case">0, nếu <i>w</i>(<i>t</i>) ≤ θ<sub>topic</sub></span><span class="case"><i>w</i>(<i>t</i>), nếu <i>w</i>(<i>t</i>) &gt; θ<sub>topic</sub></span></span></span></div>'+
+    '<p class="math-explain"><b>Ký hiệu:</b> R là tập câu đại diện; V là vocabulary; s(t) là tổng TF-IDF của token t; w(t) là trọng số sau chuẩn hóa; μ(t) là trọng số cuối cùng của vector chủ đề.</p>'+
+    '<div class="metric-row">'+metrics([[(cent.all_centroid_terms||[]).length,'token trong vocabulary'],[num(cent.threshold_topic,3),'ngưỡng θtopic'],[num(cent.threshold,3),'ngưỡng τ lọc trùng'],[cent.selection_mode==='cosine'?'Cosine + ngưỡng':'CentroidBow gốc','chế độ chọn câu'],[num(cent.cosine_threshold,3),'ngưỡng cosine θ']])+'</div>'+
+    '<section class="centroid-pipeline"><h3>Trọng số token của vector chủ đề μ</h3><p class="small">Thanh dài thể hiện trọng số sau chuẩn hóa và áp ngưỡng. Chỉ hiển thị tối đa 18 token có trọng số lớn nhất; bảng bên dưới liệt kê toàn bộ vocabulary.</p>'+bars+'</section>'+
+    flowCaption('Bảng trọng số vector μ','DF/IDF được tính trên tập câu đại diện bằng CountVectorizer và TfidfTransformer')+
+    rowTable(['Token t','DF(t)','IDF(t)','Tổng s(t)','Trọng số w(t)','Trọng số μ(t)','Trạng thái'],rows)+
+    '<div class="flow-result"><b>Vector chủ đề μ đã sẵn sàng.</b><br>Bước tiếp theo dùng cùng vector μ để tính cosine của từng câu đại diện; chưa quyết định giữ/bỏ câu ở bước này.</div>';
 }
+
 function centroidOverviewStep(){
   const cent=DATA.centroid,items=(cent.process||[]).slice().sort((a,b)=>Number(a.index)-Number(b.index)),reps=DATA.representatives||[];
   const repRows=reps.map(r=>'<tr><td><b>'+esc(r.id)+'</b></td><td class="sentence">'+esc(r.text)+'</td><td>Cụm '+(r.cluster+1)+'</td><td>'+((r.members||[]).map(esc).join(', ')||'—')+'</td></tr>');
-  const candidateRows=items.map((c,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+esc(c.id)+'</b></td><td class="sentence">'+esc(c.text)+'</td><td>Chờ tính cosine</td></tr>');
-  return '<div class="algorithm-note"><b>Đầu vào Centroid</b> là các câu đại diện lấy từ những cụm K-means. Bước này chỉ xác định dữ liệu đầu vào; chưa tính cosine, chưa xếp hạng và chưa loại câu.</div>'+graphFlow([{title:'Cụm câu K-means',body:DATA.kmeans.k+' cụm được tạo ở bước trước.'},{title:'Lấy câu đại diện',body:'Một câu gần tâm được lấy từ mỗi cụm.'},{title:'Tập ứng viên',body:items.length+' câu sẽ được chấm cosine.',kind:'primary-node'},{title:'Tính vector chủ đề μ',body:'Dùng TF-IDF của các câu đại diện.'}])+
-    '<div class="metric-row">'+metrics([[reps.length,'câu đại diện đầu vào'],[items.length,'ứng viên sẽ chấm'],[(cent.all_centroid_terms||[]).length,'token trong vocabulary'],[num(cent.threshold_topic,4),'ngưỡng lọc trọng số token']])+'</div>'+
-    '<section class="centroid-pipeline"><h3>1 · Cụm câu nhận từ K-means</h3>'+rowTable(['Câu đại diện','Nội dung','Cụm','Các câu thuộc cụm'],repRows)+'</section>'+
-    '<section class="centroid-pipeline"><h3>2 · Tập câu sẽ được tính cosine</h3><p class="small">Các câu được hiển thị theo thứ tự đầu vào, chưa theo điểm số.</p>'+rowTable(['STT đầu vào','ID','Câu','Trạng thái'],candidateRows)+'</section>'+
-    '<div class="flow-equation">Đầu vào: X = {c₁, c₂, …, cₙ} từ các cụm K-means.<br>Bước tiếp theo: xây dựng vector chủ đề μ từ TF-IDF của các câu đại diện.</div>';
+  const candidateRows=items.map((c,i)=>'<tr><td>'+(i+1)+'</td><td><b>'+esc(c.id)+'</b></td><td class="sentence">'+esc(c.text)+'</td><td>Chưa tính cosine</td></tr>');
+  return '<div class="algorithm-note"><b>Mục tiêu bước 1/5:</b> xác định hai tập dữ liệu đầu vào. Các câu đại diện của K-means vừa là nguồn để dựng vector chủ đề, vừa là các ứng viên sẽ được chấm điểm. Ở bước này chưa tính TF-IDF, chưa tạo μ, chưa tính cosine và chưa loại câu.</div>'+
+    graphFlow([{title:'K-means hoàn tất',body:DATA.kmeans.k+' cụm đã được tạo.'},{title:'Nhận câu đại diện',body:reps.length+' câu được chuyển từ bước K-means.'},{title:'Tạo tập ứng viên',body:items.length+' câu đại diện sẽ được chấm ở các bước sau.',kind:'primary-node'}])+
+    '<div class="metric-row">'+metrics([[reps.length,'câu đại diện đầu vào'],[items.length,'ứng viên sẽ chấm'],['Chưa','tính TF-IDF ở bước này'],['Chưa','xếp hạng cosine ở bước này']])+'</div>'+
+    '<section class="centroid-pipeline"><h3>Đầu vào A · Câu đại diện từ K-means</h3>'+rowTable(['Câu đại diện','Nội dung','Cụm','Các câu thuộc cụm'],repRows)+'</section>'+
+    '<section class="centroid-pipeline"><h3>Đầu vào B · Các câu sẽ được tính cosine</h3><p class="small">Danh sách này giữ thứ tự đầu vào; chưa sắp xếp theo điểm và chưa có quyết định giữ/bỏ.</p>'+rowTable(['STT đầu vào','ID','Nội dung câu','Trạng thái hiện tại'],candidateRows)+'</section>'+
+    '<div class="flow-equation math-equation"><span class="eq-line">R = {<i>r</i><sub>1</sub>, <i>r</i><sub>2</sub>, …, <i>r</i><sub>m</sub>}</span><span class="eq-line">X = {<i>x</i><sub>1</sub>, <i>x</i><sub>2</sub>, …, <i>x</i><sub>n</sub>}</span></div>'+
+    '<p class="math-explain">Trong demo này, R là tập câu đại diện dùng để tính TF-IDF và xây dựng μ; X là tập ứng viên sẽ được so sánh với μ. Khi chuyển sang bước 2, hệ thống mới bắt đầu tính trọng số token.</p>';
 }
 
 function centroidRankingStep(){
@@ -1544,27 +1705,32 @@ function centroidRankingStep(){
   }).join('');
   const rows=ranked.map((r,i)=>{
     const score=Number(r.cosine_score),pass=Number.isFinite(score)&&score>=theta;
-    return '<tr><td><b>'+(i+1)+'</b></td><td><b>'+esc(r.id)+'</b></td><td class="sentence">'+esc(r.text)+'</td><td class="num"><b>'+num(r.cosine_score,9)+'</b></td><td class="num">'+num(theta,5)+'</td><td>'+(pass?'<span class="cosine-verdict pass">Đạt ngưỡng</span>':'<span class="cosine-verdict fail">Dưới ngưỡng</span>')+'</td><td>Chờ xét trùng lặp</td></tr>';
+    return '<tr><td><b>'+(i+1)+'</b></td><td><b>'+esc(r.id)+'</b></td><td class="sentence">'+esc(r.text)+'</td><td class="num"><b>'+num(r.cosine_score,9)+'</b></td><td class="num">'+num(theta,5)+'</td><td>'+(pass?'<span class="cosine-verdict pass">Đạt θ</span>':'<span class="cosine-verdict fail">Dưới θ</span>')+'</td><td>'+(pass?'Được đưa sang bước kiểm tra trùng':'Loại ở bước ngưỡng cosine')+'</td></tr>';
   });
-  return graphFlow([{title:'Đã có cosine',body:'Mỗi câu đã được so với vector chủ đề μ.'},{title:'Sắp giảm dần',body:'Cosine lớn đứng trước.',kind:'primary-node'},{title:'Ưu tiên câu đại diện',body:'Xét từ hạng 1 xuống dưới.'},{title:'Chưa lọc trùng',body:'Bước tiếp theo mới cập nhật danh sách giữ/bỏ.',kind:'good-node'}])+
-    '<div class="flow-equation">cos(c, μ) = (c · μ) / (||c||₂ × ||μ||₂)<br>Thứ tự xét: c₍₁₎, c₍₂₎, … theo cosine giảm dần.<br>Ngưỡng cosine θ = '+num(theta,5)+'</div>'+
-    '<section class="centroid-pipeline"><h3>Xếp hạng cosine</h3><p class="small">Mỗi thanh biểu thị cosine trong khoảng 0–1; vạch dọc là ngưỡng θ. Đây mới là thứ hạng, chưa phải kết quả giữ/bỏ cuối cùng.</p><div class="centroid-cosine-list">'+bars+'</div></section>'+
-    '<section class="centroid-pipeline"><h3>Bảng xếp hạng đầy đủ</h3>'+rowTable(['Hạng','Câu','Nội dung','Cosine','Ngưỡng θ','Điều kiện cosine','Bước tiếp theo'],rows)+'</section>'+
-    '<div class="flow-focus"><b>Tiếp theo: duyệt theo đúng thứ hạng này.</b> Câu dưới ngưỡng cosine sẽ bị loại. Câu đạt ngưỡng mới được so với các câu đã giữ để tránh chọn nội dung quá giống nhau.</div>';
+  return graphFlow([{title:'Nhận điểm cosine',body:'Mỗi ứng viên đã có một điểm cos(xᵢ, μ).'},{title:'Sắp xếp giảm dần',body:'Điểm lớn hơn được xếp trước.',kind:'primary-node'},{title:'Xét từ hạng 1',body:'Duyệt theo thứ tự điểm đã sắp.'},{title:'Chưa lọc trùng',body:'Bộ lọc trùng lặp chạy ở bước kế tiếp.',kind:'good-node'}])+
+    '<div class="flow-equation math-equation"><span class="eq-line">cos(<i>x</i><sub>i</sub>, μ) = <span class="math-frac"><span><i>x</i><sub>i</sub> · μ</span><span>‖<i>x</i><sub>i</sub>‖<sub>2</sub> ‖μ‖<sub>2</sub></span></span></span><span class="eq-line">cos(<i>x</i><sub>(1)</sub>, μ) ≥ cos(<i>x</i><sub>(2)</sub>, μ) ≥ ⋯ ≥ cos(<i>x</i><sub>(n)</sub>, μ)</span><span class="eq-line">Điều kiện qua ngưỡng: cos(<i>x</i><sub>i</sub>, μ) ≥ θ, với θ = '+num(theta,5)+'</span></div>'+
+    '<p class="math-explain">Thứ hạng chỉ quyết định câu nào được xét trước. Điểm đạt θ chưa đồng nghĩa chắc chắn được giữ: câu còn phải qua bộ lọc trùng lặp và giới hạn số câu.</p>'+
+    '<section class="centroid-pipeline"><h3>Thứ tự cosine</h3><p class="small">Mỗi thanh biểu thị cos(xᵢ, μ) trong khoảng 0–1; vạch dọc là ngưỡng θ. Màu xanh/cam chỉ cho biết đạt hay chưa đạt ngưỡng, không phải quyết định cuối.</p><div class="centroid-cosine-list">'+bars+'</div></section>'+
+    '<section class="centroid-pipeline"><h3>Bảng xếp hạng</h3>'+rowTable(['Hạng','Câu','Nội dung','Cosine','Ngưỡng θ','Kiểm tra ngưỡng','Bước kế tiếp'],rows)+'</section>'+
+    '<div class="flow-result"><b>Bước tiếp theo:</b> duyệt ứng viên theo hạng này. Câu dưới ngưỡng θ bị loại ngay; câu đạt ngưỡng mới được so với các câu đã giữ bằng similarity cặp câu.</div>';
 }
+
 function centroidCandidateScore(item){
   const cent=DATA.centroid,items=(cent.process||[]).slice().sort((a,b)=>Number(a.index)-Number(b.index));
   const rows=items.map((c,i)=>{
     const terms=(c.cosine_terms||[]);
-    const detail=terms.map(t=>esc(t.term)+': '+num(t.tfidf,4)+'×'+num(t.centroid_weight,4)+'='+num(t.product,5)).join('<br>');
+    const detail=terms.map(t=>'<span class="eq-line"><i>'+esc(t.term)+'</i>: '+num(t.tfidf,4)+' × '+num(t.centroid_weight,4)+' = '+num(t.product,5)+'</span>').join('');
     const score=Number(c.cosine_score),pass=Number.isFinite(score)&&score>=Number(cent.cosine_threshold||0);
-    return '<tr class="'+(pass?'won':'lost')+'"><td class="num">'+(i+1)+'</td><td><b>'+esc(c.id)+'</b></td><td class="sentence">'+esc(c.text)+'</td><td>'+detail+'</td><td class="num">'+num(c.cosine_dot,8)+'</td><td class="num">'+num(c.cosine_sentence_norm,8)+'</td><td class="num">'+num(c.cosine_centroid_norm,8)+'</td><td class="num"><b>'+num(c.cosine_score,9)+'</b></td><td>'+(pass?'Đạt θ':'Dưới θ')+'</td></tr>';
+    return '<tr class="'+(pass?'won':'lost')+'"><td class="num">'+(i+1)+'</td><td><b>'+esc(c.id)+'</b></td><td class="sentence">'+esc(c.text)+'</td><td><div class="math-equation">'+detail+'</div></td><td class="num">'+num(c.cosine_dot,8)+'</td><td class="num">'+num(c.cosine_sentence_norm,8)+'</td><td class="num">'+num(c.cosine_centroid_norm,8)+'</td><td class="num"><b>'+num(c.cosine_score,9)+'</b></td><td>'+(pass?'Đạt θ':'Dưới θ')+'</td></tr>';
   });
-  return flowBadge('Tính cosine đồng loạt · '+items.length+' câu')+
-    '<div class="flow-equation">TF-IDF(c,t) = TF(c,t) × IDF(t) &nbsp; · &nbsp; c · μ = Σₜ TF-IDF(c,t) × μ(t)<br>cos(c, μ) = (c · μ) / (||c||₂ × ||μ||₂) &nbsp; · &nbsp; θ = '+num(cent.cosine_threshold,5)+'</div>'+
-    '<section class="centroid-pipeline"><h3>Một bảng duy nhất cho tất cả câu</h3><p class="small">Mỗi dòng tương ứng một câu ứng viên. “Tính theo token” liệt kê từng đóng góp TF-IDF(c,t) × μ(t); các cột bên phải tổng hợp tử số, hai chuẩn vector và cosine cuối cùng.</p>'+rowTable(['#','Câu','Nội dung','Tính theo token: TF-IDF × μ(t)','c · μ','||c||₂','||μ||₂','Cosine','Ngưỡng'],rows)+'</section>'+
-    '<div class="flow-result"><b>Đã tính cosine cho '+items.length+' câu trong cùng một bảng.</b><br>Bước tiếp theo sẽ xếp hạng các câu theo cosine giảm dần rồi áp dụng ngưỡng và kiểm tra trùng lặp.</div>';
+  return flowBadge('Bước 3/5 · Tính cosine cho từng ứng viên')+
+    graphFlow([{title:'Vector câu xᵢ',body:'TF-IDF của từng token trong ứng viên.'},{title:'Tích vô hướng',body:'Cộng TF-IDF(cᵢ,t) × μ(t).'},{title:'Chuẩn vector',body:'Tính ‖xᵢ‖₂ và ‖μ‖₂.'},{title:'Cosine',body:'Chia tích vô hướng cho tích hai chuẩn.',kind:'primary-node'}])+
+    '<div class="flow-equation math-equation"><span class="eq-line"><i>x</i><sub>i</sub> · μ = ∑<sub><i>t</i>∈V</sub> <span class="math-op">TF-IDF</span>(<i>c</i><sub>i</sub>, <i>t</i>) μ(<i>t</i>)</span><span class="eq-line">cos(<i>x</i><sub>i</sub>, μ) = <span class="math-frac"><span><i>x</i><sub>i</sub> · μ</span><span>‖<i>x</i><sub>i</sub>‖<sub>2</sub> ‖μ‖<sub>2</sub></span></span></span><span class="eq-line">θ = '+num(cent.cosine_threshold,5)+'</span></div>'+
+    '<p class="math-explain">Mỗi dòng trong bảng là một câu. Cột “Đóng góp theo token” liệt kê tối đa 20 tích dương lớn nhất để bảng dễ đọc; cột tử số vẫn là tổng trên toàn bộ vocabulary. Hai cột chuẩn vector tạo thành mẫu số. Cosine được tính cho toàn bộ ứng viên trước khi bắt đầu xếp hạng.</p>'+
+    '<div class="flow-result"><b>Đã tính cosine cho '+items.length+' ứng viên.</b> Bảng dưới đây giữ thứ tự đầu vào, chưa sắp xếp theo điểm. Bước kế tiếp mới xếp cosine giảm dần.</div>'+
+    '<section class="centroid-pipeline centroid-cosine-table"><h3>Bảng tính cosine đầy đủ · tất cả ứng viên</h3>'+rowTable(['# đầu vào','Câu','Nội dung','Đóng góp theo token: TF-IDF × μ(t)','Tử số xᵢ · μ','‖xᵢ‖₂','‖μ‖₂','cos(xᵢ, μ)','Kiểm tra θ'],rows)+'</section>';
 }
+
 function centroidCompareStep(item){const cent=DATA.centroid,c=cent.process[item.centroidIndex],p=c?.comparisons?.[item.comparisonIndex];if(!c||!p)return '';const rejected=Number(p.similarity)>Number(cent.threshold);return '<div class="flow-focus"><b>Ứng viên đang xét: '+esc(c.id)+'</b>'+esc(c.text)+'</div><div class="flow-equation">Sim('+esc(c.id)+', '+esc(p.against_id)+') = '+num(p.similarity,9)+'<br>Ngưỡng lọc trùng = '+num(p.threshold,5)+'</div><section class="mmr-branch '+(rejected?'red':'score')+'"><h4>Kết quả so sánh</h4><p>'+esc(p.against_id)+' · '+esc(p.against_text)+'</p><div class="flow-equation">'+num(p.similarity,9)+' '+(rejected?'>':'≤')+' '+num(p.threshold,5)+'</div><div class="flow-result '+(rejected?'':'good')+'"><b>'+(rejected?'Vượt ngưỡng → loại ứng viên':'Không vượt ngưỡng → phép so sánh này cho phép giữ')+'</b>'+(!rejected?' Tuy nhiên, ứng viên còn phải qua các phép so sánh với các câu đã giữ khác.':'')+'</div></section><details class="flow-hidden-detail"><summary>Chi tiết similarity nếu có</summary>'+esc(JSON.stringify(p,null,2))+'</details>';}
 function centroidDecisionStep(item){
   const items=DATA.centroid.process||[],c=items[item.centroidIndex];if(!c)return '';
@@ -1572,29 +1738,29 @@ function centroidDecisionStep(item){
   const ranked=(cent.ranking||[]).slice().sort((a,b)=>(Number(b.cosine_score)-Number(a.cosine_score))||(Number(a.index)-Number(b.index)));
   const rankPosition=ranked.findIndex(r=>Number(r.index)===Number(c.index));
   const rankNo=rankPosition+1,cosineValue=Number(c.cosine_score),passes=Number.isFinite(cosineValue)&&cosineValue>=theta;
+  const atLimit=!c.selected&&/đủ giới hạn 20 câu/i.test(String(c.reason||''));
   const comparisonRows=(c.comparisons||[]).map(p=>{
-    const rejected=Number(p.similarity)>Number(p.threshold??tau);
-    return '<tr class="'+(rejected?'lost':'won')+'"><td><b>'+esc(p.against_id)+'</b></td><td class="sentence">'+esc(p.against_text)+'</td><td class="num">'+num(p.similarity,8)+'</td><td class="num">'+num(p.threshold??tau,5)+'</td><td>'+(rejected?'<span class="cosine-verdict fail">Vượt ngưỡng · loại</span>':'<span class="cosine-verdict pass">Không vượt ngưỡng</span>')+'</td></tr>';
-  });
-  const considered=ranked.slice(0,rankPosition+1);
-  const historyRows=considered.map((r,i)=>{
-    const p=items.find(x=>Number(x.index)===Number(r.index));if(!p)return '';
-    const current=Number(r.index)===Number(c.index),score=Number(p.cosine_score),pass=Number.isFinite(score)&&score>=theta;
-    const outcome=current?(p.selected?'ĐANG GIỮ':'ĐANG LOẠI'):(p.selected?'Đã giữ':'Đã loại');
-    return '<tr class="'+(current?'won':'')+'"><td>'+(i+1)+'</td><td><b>'+esc(p.id)+'</b></td><td class="num">'+num(p.cosine_score,8)+'</td><td>'+(pass?'Đạt':'Dưới ngưỡng')+'</td><td>'+(p.selected?'<span class="pill">'+outcome+'</span>':outcome)+'</td></tr>';
+    const threshold=Number(p.threshold??tau),rejected=Number(p.similarity)>threshold;
+    return '<tr class="'+(rejected?'lost':'won')+'"><td><b>'+esc(p.against_id)+'</b></td><td class="sentence">'+esc(p.against_text)+'</td><td class="num">'+num(p.similarity,8)+'</td><td class="num">'+num(threshold,5)+'</td><td>'+(rejected?'<span class="cosine-verdict fail">Vượt τ · loại</span>':'<span class="cosine-verdict pass">Không vượt τ</span>')+'</td></tr>';
   });
   let reason=c.reason||'';
-  if(!passes) reason='Bị loại vì cosine '+num(c.cosine_score,7)+' < ngưỡng θ = '+num(theta,5)+'.';
-  else if(c.selected) reason='Cosine đạt ngưỡng và không trùng quá mức với câu đã giữ trước đó.';
-  else if((c.comparisons||[]).some(p=>Number(p.similarity)>Number(p.threshold??tau))) reason='Cosine đạt ngưỡng, nhưng bị loại vì độ tương đồng với câu đã giữ vượt ngưỡng lọc trùng.';
+  if(atLimit) reason='Bị loại vì đã đạt giới hạn 20 câu được chọn.';
+  else if(!passes) reason='Bị loại vì cos(xᵢ, μ) = '+num(c.cosine_score,7)+' < θ = '+num(theta,5)+'.';
+  else if(c.selected) reason='Cosine đạt ngưỡng θ và không có similarity cặp câu nào vượt ngưỡng τ.';
+  else if((c.comparisons||[]).some(p=>Number(p.similarity)>Number(p.threshold??tau))) reason='Cosine đạt θ nhưng bị loại vì similarity với một câu đã giữ vượt τ.';
   const decisionTitle=c.selected?'✓ GIỮ '+esc(c.id):'✕ LOẠI '+esc(c.id);
-  return '<div class="flow-focus '+(c.selected?'good':'warn')+'"><b>Hạng '+rankNo+' / '+ranked.length+' · '+decisionTitle+'</b>'+esc(reason)+'</div>'+
-    '<div class="flow-equation">Ứng viên: '+esc(c.id)+'<br>cos('+esc(c.id)+', μ) = '+num(c.cosine_score,9)+'<br>Ngưỡng cosine θ = '+num(theta,5)+'<br>'+num(c.cosine_score,9)+' '+(passes?'≥':'<')+' '+num(theta,5)+' → '+(passes?'đạt điều kiện cosine':'không đạt, loại ngay')+'</div>'+
-    '<section class="centroid-pipeline"><h3>1 · Kiểm tra ngưỡng cosine</h3><div class="cosine-meter"><div class="cosine-meter-fill" style="width:'+Math.max(0,Math.min(100,cosineValue*100||0))+'%"></div></div><div class="cosine-threshold-row"><div class="cosine-threshold-mark" style="left:'+Math.max(0,Math.min(100,theta*100))+'%"></div></div><p class="small">Chỉ khi cosine ≥ θ mới tiếp tục kiểm tra trùng lặp.</p></section>'+
-    '<section class="centroid-pipeline"><h3>2 · Kiểm tra trùng lặp với câu đã giữ</h3><div class="flow-equation">Nếu cos(c, μ) < θ → loại.<br>Nếu cos(c, μ) ≥ θ: so CentroidBow.similarity(c, s) với từng s đã giữ.<br>Nếu similarity(c, s) > τ = '+num(tau,5)+' → loại vì trùng lặp.</div>'+
-    (!passes?'<div class="flow-result"><b>Bỏ qua kiểm tra trùng lặp.</b> Câu không đạt ngưỡng cosine nên không thể vào tập câu được chọn.</div>':comparisonRows.length?rowTable(['Câu đã giữ s','Nội dung','Similarity(c, s)','Ngưỡng τ','Kết quả'],comparisonRows):'<div class="flow-result">Không có câu đã giữ trước đó để so sánh; ứng viên qua bước trùng lặp nếu đạt ngưỡng cosine.</div>')+'</section>'+
-    '<div class="flow-result"><b>Quyết định cho '+esc(c.id)+': '+(c.selected?'GIỮ → chuyển vào danh sách câu đại diện':'LOẠI → không chuyển sang MMR')+'</b><br>'+esc(reason)+'</div>'+
-    flowCaption('Các câu đã xét theo thứ tự cosine đến thời điểm này','Chưa hiển thị các hạng phía sau')+rowTable(['Hạng','Câu','Cosine','Ngưỡng cosine','Trạng thái'],historyRows);
+  const decisionFlow=graphFlow([
+    {title:'1 · Kiểm tra cosine',body:'cos = '+num(c.cosine_score,5)+'; θ = '+num(theta,5),kind:passes?'good-node':'warn-node'},
+    {title:passes?'2 · Kiểm tra trùng':'2 · Bỏ qua kiểm tra trùng',body:!passes?'Cosine dưới ngưỡng nên dừng tại đây.':atLimit?'Đã đạt giới hạn 20 câu.':(c.comparisons||[]).length+' phép so với câu đã giữ.'},
+    {title:'3 · Quyết định',body:c.selected?'Giữ và chuyển sang MMR.':'Loại, không chuyển sang MMR.',kind:c.selected?'good-node':'warn-node'}
+  ]);
+  return decisionFlow+'<div class="flow-focus '+(c.selected?'good':'warn')+'"><b>Hạng '+rankNo+' / '+ranked.length+' · '+decisionTitle+'</b>'+esc(reason)+'</div>'+
+    '<div class="flow-equation math-equation"><span class="eq-line">Ứng viên: <i>c</i><sub>i</sub> = '+esc(c.id)+'</span><span class="eq-line">cos(<i>x</i><sub>i</sub>, μ) = '+num(c.cosine_score,9)+'</span><span class="eq-line">θ = '+num(theta,5)+' &nbsp; ⇒ &nbsp; '+num(c.cosine_score,9)+' '+(passes?'≥':'<')+' '+num(theta,5)+'</span></div>'+
+    '<section class="centroid-pipeline"><h3>1 · Điều kiện cosine</h3><div class="cosine-meter"><div class="cosine-meter-fill" style="width:'+Math.max(0,Math.min(100,cosineValue*100||0))+'%"></div></div><div class="cosine-threshold-row"><div class="cosine-threshold-mark" style="left:'+Math.max(0,Math.min(100,theta*100))+'%"></div></div><p class="small">Chỉ khi cos(xᵢ, μ) ≥ θ, ứng viên mới được xét tiếp. Nếu thấp hơn θ, câu bị loại ngay.</p></section>'+
+    '<section class="centroid-pipeline"><h3>2 · Bộ lọc trùng lặp</h3><div class="flow-equation math-equation"><span class="eq-line">Nếu cos(<i>x</i><sub>i</sub>, μ) &lt; θ ⇒ loại.</span><span class="eq-line">Nếu cos(<i>x</i><sub>i</sub>, μ) ≥ θ: so với từng câu đã giữ <i>s</i><sub>j</sub>.</span><span class="eq-line"><span class="math-op">sim</span>(<i>c</i><sub>i</sub>, <i>s</i><sub>j</sub>) &gt; τ ⇒ loại vì trùng lặp, với τ = '+num(tau,5)+'</span><span class="eq-line">Nếu không vượt τ với các câu đã giữ ⇒ giữ ứng viên.</span></div><p class="math-explain">Trong triển khai này, hàm lọc trùng nhận ứng viên ở đối số thứ nhất và câu đã giữ ở đối số thứ hai: sim(cᵢ, sⱼ). Không đảo thứ tự hai đối số khi diễn giải kết quả.</p>'+
+    (!passes?'<div class="flow-result"><b>Không thực hiện so trùng.</b> Câu không đạt ngưỡng cosine nên bị loại ở điều kiện 1.</div>':atLimit?'<div class="flow-result"><b>Đã chạm giới hạn số câu.</b> Ứng viên không được thêm vào danh sách dù cosine đạt ngưỡng.</div>':comparisonRows.length?rowTable(['Câu đã giữ sⱼ','Nội dung','sim(cᵢ, sⱼ)','Ngưỡng τ','Kết quả'],comparisonRows):'<div class="flow-result">Chưa có câu đã giữ cần so sánh; ứng viên qua điều kiện chống trùng nếu không vướng giới hạn 20 câu.</div>')+'</section>'+
+    '<div class="flow-result"><b>Quyết định cho '+esc(c.id)+': '+(c.selected?'GIỮ → chuyển sang MMR':'LOẠI → không chuyển sang MMR')+'</b><br>'+esc(reason)+'</div>'+
+    flowCaption('Các câu đã xét theo thứ hạng cosine đến thời điểm này','Trạng thái được cập nhật theo đúng thứ tự duyệt')+rowTable(['Hạng','Câu','Cosine','Điều kiện θ','Trạng thái'],ranked.slice(0,rankPosition+1).map((r,i)=>{const p=items.find(x=>Number(x.index)===Number(r.index));if(!p)return '';const active=Number(r.index)===Number(c.index),score=Number(p.cosine_score),pass=Number.isFinite(score)&&score>=theta;const outcome=active?(p.selected?'ĐANG GIỮ':'ĐANG LOẠI'):(p.selected?'Đã giữ':'Đã loại');return '<tr class="'+(active?'won':'')+'"><td>'+(i+1)+'</td><td><b>'+esc(p.id)+'</b></td><td class="num">'+num(p.cosine_score,8)+'</td><td>'+(pass?'Đạt':'Dưới θ')+'</td><td>'+(p.selected?'<span class="pill">'+outcome+'</span>':outcome)+'</td></tr>';}));
 }
 
 function mmrQueryStep(){
@@ -1725,7 +1891,7 @@ function mmrLiveBoard(item){
   return '<div class="mmr-live-shell"><div class="mmr-live-q"><div><b>Q · GIỮ NGUYÊN Q QUA MỌI VÒNG</b><small>'+esc(q.id)+' · '+esc(q.text)+'</small></div><span>'+esc(heading)+'</span></div><div class="mmr-live-grid"><section class="mmr-live-column before"><h3>TRƯỚC LƯỢT · R ĐÃ CHỌN</h3>'+beforeHtml+'<p class="mmr-live-column-note">Các câu trong R dùng để tính Red.</p></section><section class="mmr-live-column candidates"><h3>ỨNG VIÊN CHƯA CHỌN</h3>'+candidateHtml+'<p class="mmr-live-column-note">'+(activeCandidate?'Đang xét '+esc(activeCandidate.id)+'. Sau khi chấm hết ứng viên sẽ chọn MMRScore cao nhất.':'Chuyển từng bước để xem phép tính của từng câu.')+'</p></section><section class="mmr-live-column after"><h3>SAU LƯỢT · R MỚI</h3>'+afterHtml+'<p class="mmr-live-column-note">'+(winnerStage&&winner?'Đã thêm '+esc(winner.id)+' vào R.':'Chưa chuyển câu thắng cho đến Bước 4.')+'</p></section><section class="mmr-live-column remaining"><h3>ỨNG VIÊN CÒN LẠI</h3>'+remainingHtml+'<p class="mmr-live-column-note">'+(winnerStage?'Câu thắng đã bị loại khỏi U.':'Sau khi chọn câu thắng, câu đó sẽ bị bỏ khỏi danh sách này.')+'</p></section></div>'+liveNote+'</div>';
 }
 
-function flowRenderContent(item){if(item.group===4)return mmrLiveBoard(item);switch(item.type){case'input':return flowInput();case'preprocess':return flowPreprocess();case'wordvec':return flowWordVec();case'km-points':return kmPointsStep();case'km-init':return kmInitStep();case'km-frame':return kmTeachingFrameStep(item);case'km-animation':return kmAnimationStep();case'representative-summary':return representativeSummaryStep();case'representative':return representativeStep(item);case'centroid-overview':return centroidOverviewStep();case'centroid-vector':return centroidVectorStep();case'centroid-candidate':return centroidCandidateScore(item);case'centroid-ranking':return centroidRankingStep();case'centroid-decision':return centroidDecisionStep(item);case'mmr-empty':return '<div class="note warn">Không có ứng viên sau CentroidBow nên không thể khởi tạo Q cho MMR. Hãy kiểm tra ngưỡng hoặc văn bản đầu vào.</div>';case'mmr-query':return mmrQueryStep();case'mmr-rel-overview':return mmrRelOverviewStep(item);case'mmr-red-overview':return mmrRedOverviewStep(item);case'mmr-score-overview':return mmrScoreOverviewStep(item);case'mmr-candidate-evaluate':return mmrScoreStep(item);case'mmr-winner':return mmrWinnerStep(item);case'mmr-loop-check':return mmrLoopCheckStep(item);case'mmr-order':return '<div class="flow-focus"><b>Thứ tự theo điểm MMR</b>MMR thêm từng câu theo thứ tự thắng của các vòng.</div><ol class="final-list">'+DATA.mmr.selected.map((x,i)=>'<li><small>'+String(i+1)+'. '+esc(x.id)+'</small>'+esc(x.text)+'</li>').join('')+'</ol>';case'final':return finalStage();default:return '<div class="note">Không có nội dung cho bước này.</div>';}}
+function flowRenderContent(item){if(item.group===4)return mmrLiveBoard(item);switch(item.type){case'input':return flowInput();case'preprocess':return flowPreprocess();case'wordvec':return flowWordVec();case'km-points':return kmPointsStep();case'km-init':return kmInitStep();case'km-frame':return kmTeachingFrameStep(item);case'km-move':return kmMovementStep(item);case'km-final':return kmeansFinalConnections();case'km-animation':return kmAnimationStep();case'representative-summary':return representativeSummaryStep();case'representative':return representativeStep(item);case'centroid-overview':return centroidOverviewStep();case'centroid-vector':return centroidVectorStep();case'centroid-candidate':return centroidCandidateScore(item);case'centroid-ranking':return centroidRankingStep();case'centroid-decision':return centroidDecisionStep(item);case'mmr-empty':return '<div class="note warn">Không có ứng viên sau CentroidBow nên không thể khởi tạo Q cho MMR. Hãy kiểm tra ngưỡng hoặc văn bản đầu vào.</div>';case'mmr-query':return mmrQueryStep();case'mmr-rel-overview':return mmrRelOverviewStep(item);case'mmr-red-overview':return mmrRedOverviewStep(item);case'mmr-score-overview':return mmrScoreOverviewStep(item);case'mmr-candidate-evaluate':return mmrScoreStep(item);case'mmr-winner':return mmrWinnerStep(item);case'mmr-loop-check':return mmrLoopCheckStep(item);case'mmr-order':return '<div class="flow-focus"><b>Thứ tự theo điểm MMR</b>MMR thêm từng câu theo thứ tự thắng của các vòng.</div><ol class="final-list">'+DATA.mmr.selected.map((x,i)=>'<li><small>'+String(i+1)+'. '+esc(x.id)+'</small>'+esc(x.text)+'</li>').join('')+'</ol>';case'final':return finalStage();default:return '<div class="note">Không có nội dung cho bước này.</div>';}}
 function renderFlowStrip(item){
   const best=(DATA.kmeans.restarts||[]).find(r=>r.best), frame=item.runIndex!==undefined?runFor(item).history?.[item.frameIndex]:null;
   const repTexts=new Set(),centTexts=new Set(),mmrTexts=new Set((DATA.mmr.selected||[]).map(x=>x.text)),finalTexts=new Set((DATA.final||[]).map(x=>x.text));
@@ -1805,9 +1971,14 @@ function flowSchedulePlay(){
     if(!flowIsPlaying)return;
     if(item?.type==='km-frame'&&kmLessonState&&!['complete'].includes(kmLessonState.phase)){flowTimer=setTimeout(waitUntilSceneDone,160);return;}
     if(item?.type==='km-init'&&kmInitState&&(kmInitState.running||kmInitState.cursor<(kmInitState.frame.centers||[]).length-1)){flowTimer=setTimeout(waitUntilSceneDone,160);return;}
+    if(item?.type==='km-move'&&kmMoveState){
+      const k=(kmMoveState.frame.centers_after||kmMoveState.frame.centers||[]).length;
+      if(!kmMoveState.running&&kmMoveState.clusterIndex<k-1)kmMovePlay();
+      if(kmMoveState.running||kmMoveState.clusterIndex<k-1){flowTimer=setTimeout(waitUntilSceneDone,160);return;}
+    }
     flowTimer=setTimeout(advance,450);
   };
-  const kmMinimum=item?.type==='km-frame'?Math.min(45000,Math.max(delay,(DATA.sentences.length*650)+1900)):delay;
+  const kmMinimum=item?.type==='km-frame'?Math.min(45000,Math.max(delay,(DATA.sentences.length*650)+1900)):(item?.type==='km-move'?Math.max(delay,((DATA.kmeans.k||1)*1050)+700):delay);
   flowTimer=setTimeout(waitUntilSceneDone,kmMinimum);
 }
 function flowTogglePlay(){
@@ -1815,6 +1986,7 @@ function flowTogglePlay(){
     flowIsPlaying=false;if(flowTimer){clearTimeout(flowTimer);flowTimer=null;}
     if(kmLessonState?.running){kmLessonState.running=false;kmLessonStopTimer();kmLessonRefresh();}
     if(kmInitState?.running){kmInitState.running=false;kmInitStop();kmInitRefresh();}
+    if(kmMoveState?.running){kmMoveState.running=false;kmMoveStopTimer();kmMoveRefresh();}
     $('flow-play').textContent='▶ Tự chạy';$('flow-live').textContent='ĐÃ TẠM DỪNG';return;
   }
   if(flowIndex>=flowSteps.length-1)flowGo(0);
@@ -1822,9 +1994,9 @@ function flowTogglePlay(){
   flowIsPlaying=true;$('flow-play').textContent='⏸ Tạm dừng';$('flow-live').textContent='ĐANG CHẠY';flowSchedulePlay();
 }
 
-function flowRender(){if(!DATA||!flowSteps.length)return;stopKmGraph();kmLessonStopTimer();kmInitStop();kmInitState=null;kmLessonState=null;const item=flowSteps[flowIndex];const mmrOnlyView=item.group===4;const teachingHeading=document.querySelector('.flow-step-heading');const sentenceStrip=document.querySelector('.flow-strip');if(teachingHeading)teachingHeading.style.display=mmrOnlyView?'none':'';if(sentenceStrip)sentenceStrip.style.display=mmrOnlyView?'none':'';$('flow-groups').innerHTML=FLOW_GROUPS.map((label,i)=>'<button type="button" data-flow-group="'+i+'" class="'+(i===item.group?'on':'')+'"><span class="flow-group-number">'+String(i+1).padStart(2,'0')+'</span><span>'+label+'</span></button>').join('');$('flow-groups').querySelectorAll('[data-flow-group]').forEach(b=>b.onclick=()=>{flowStop();const g=Number(b.dataset.flowGroup),first=flowSteps.findIndex(x=>x.group===g);if(first>=0){flowGo(first);}});$('flow-badge').textContent=String(item.group+1).padStart(2,'0');$('flow-kicker').textContent='GIAI ĐOẠN '+String(item.group+1).padStart(2,'0')+' / '+FLOW_GROUPS.length+' · BƯỚC '+String(flowIndex+1).padStart(2,'0')+' / '+String(flowSteps.length).padStart(2,'0');$('flow-title').textContent=item.title;$('flow-description').textContent=item.description;$('flow-content').innerHTML=lessonBoard(item)+flowRenderContent(item);$('flow-content').className='flow-content-enter type-'+item.type;void $('flow-content').offsetWidth;$('flow-count').textContent='Bước '+(flowIndex+1)+' / '+flowSteps.length;$('flow-progress').max=Math.max(1,flowSteps.length-1);$('flow-progress').value=flowIndex;$('flow-prev').disabled=flowIndex===0;$('flow-next').disabled=flowIndex===flowSteps.length-1;$('flow-live').textContent='ĐANG XEM';renderFlowStrip(item);if(item.type==='km-animation')bindKmGraphControls();if(item.type==='km-init')bindKmInitControls();if(item.type==='km-frame')bindKmLessonControls(item);}
+function flowRender(){if(!DATA||!flowSteps.length)return;stopKmGraph();kmLessonStopTimer();kmInitStop();kmMoveStopTimer();kmInitState=null;kmLessonState=null;kmMoveState=null;const item=flowSteps[flowIndex];const mmrOnlyView=item.group===4;const teachingHeading=document.querySelector('.flow-step-heading');const sentenceStrip=document.querySelector('.flow-strip');if(teachingHeading)teachingHeading.style.display=mmrOnlyView?'none':'';if(sentenceStrip)sentenceStrip.style.display=mmrOnlyView?'none':'';$('flow-groups').innerHTML=FLOW_GROUPS.map((label,i)=>'<button type="button" data-flow-group="'+i+'" class="'+(i===item.group?'on':'')+'"><span class="flow-group-number">'+String(i+1).padStart(2,'0')+'</span><span>'+label+'</span></button>').join('');$('flow-groups').querySelectorAll('[data-flow-group]').forEach(b=>b.onclick=()=>{flowStop();const g=Number(b.dataset.flowGroup),first=flowSteps.findIndex(x=>x.group===g);if(first>=0){flowGo(first);}});$('flow-badge').textContent=String(item.group+1).padStart(2,'0');$('flow-kicker').textContent='GIAI ĐOẠN '+String(item.group+1).padStart(2,'0')+' / '+FLOW_GROUPS.length+' · BƯỚC '+String(flowIndex+1).padStart(2,'0')+' / '+String(flowSteps.length).padStart(2,'0');$('flow-title').textContent=item.title;$('flow-description').textContent=item.description;$('flow-content').innerHTML=lessonBoard(item)+flowRenderContent(item);$('flow-content').className='flow-content-enter type-'+item.type;void $('flow-content').offsetWidth;$('flow-count').textContent='Bước '+(flowIndex+1)+' / '+flowSteps.length;$('flow-progress').max=Math.max(1,flowSteps.length-1);$('flow-progress').value=flowIndex;$('flow-prev').disabled=flowIndex===0;$('flow-next').disabled=flowIndex===flowSteps.length-1;$('flow-live').textContent='ĐANG XEM';renderFlowStrip(item);if(item.type==='km-animation')bindKmGraphControls();if(item.type==='km-init')bindKmInitControls();if(item.type==='km-frame')bindKmLessonControls(item);if(item.type==='km-move')bindKmMoveControls(item);}
 function flowGo(n){flowIndex=Math.max(0,Math.min(n,flowSteps.length-1));flowRender();}
-function flowStop(){flowIsPlaying=false;if(flowTimer){clearTimeout(flowTimer);flowTimer=null;}stopKmGraph();kmInitStop();if(kmInitState)kmInitState.running=false;$('flow-play').textContent='▶ Tự chạy';$('flow-live').textContent='ĐÃ TẠM DỪNG';}
+function flowStop(){flowIsPlaying=false;if(flowTimer){clearTimeout(flowTimer);flowTimer=null;}stopKmGraph();kmInitStop();kmMoveStopTimer();if(kmMoveState)kmMoveState.running=false;if(kmInitState)kmInitState.running=false;$('flow-play').textContent='▶ Tự chạy';$('flow-live').textContent='ĐÃ TẠM DỪNG';}
 $('flow-prev').onclick=()=>{flowStop();flowGo(flowIndex-1);};$('flow-next').onclick=()=>{flowStop();flowGo(flowIndex+1);};$('flow-speed').onchange=()=>{if(flowIsPlaying){if(flowTimer){clearTimeout(flowTimer);flowTimer=null;}flowSchedulePlay();}};$('flow-play').onclick=flowTogglePlay;
 document.addEventListener('keydown',e=>{if(!$('results')||$('results').style.display==='none')return;if(e.key==='ArrowRight'){flowStop();flowGo(flowIndex+1)}if(e.key==='ArrowLeft'){flowStop();flowGo(flowIndex-1)}});
 function render(){if(!DATA)return;flowBuild();flowIndex=0;flowRender();}
@@ -2369,7 +2541,14 @@ def _sentence_similarity_detail(sentence1, sentence2, idf):
 
 def run_pipeline(payload):
 
+    import random
     import numpy as np
+
+    # Cố định seed mỗi lần gọi API để cùng đầu vào cho kết quả tái lập được.
+    # Word2Vec vẫn cần seed riêng và workers=1 để tránh bất định do đa luồng.
+    RANDOM_SEED = 42
+    random.seed(RANDOM_SEED)
+    np.random.seed(RANDOM_SEED)
 
     from gensim.models import Word2Vec
 
@@ -2435,6 +2614,7 @@ def run_pipeline(payload):
     boundaries = []
 
     source_doc = []
+    source_positions = []
 
     dropped_count = 0
 
@@ -2444,7 +2624,7 @@ def run_pipeline(payload):
 
         boundaries.append(len(sentences))
 
-        for original in sent_tokenize(text.strip()):
+        for input_position, original in enumerate(sent_tokenize(text.strip())):
 
             original = original.strip()
 
@@ -2467,6 +2647,7 @@ def run_pipeline(payload):
             sentences.append(Sentence("doc_" + str(document_index + 1), processed, original))
 
             source_doc.append(document_index)
+            source_positions.append(input_position)
 
 
 
@@ -2522,7 +2703,15 @@ def run_pipeline(payload):
 
     # Match the production Word2Vec call and sum word vectors sentence-wise.
 
-    model = Word2Vec(sentences=text_sents, vector_size=256, window=5, min_count=1, workers=4, sg=0)
+    model = Word2Vec(
+        sentences=text_sents,
+        vector_size=256,
+        window=5,
+        min_count=1,
+        workers=1,
+        sg=0,
+        seed=RANDOM_SEED,
+    )
 
     X = []
 
@@ -2545,10 +2734,10 @@ def run_pipeline(payload):
     # Trace every K-means++ restart. For each seed, compare our visible step log
     # with an actual sklearn fit from the exact same initial centers. The real
     # sklearn inertia decides the winning restart.
-    template = KMeans(n_clusters=n_clusters)
+    template = KMeans(n_clusters=n_clusters, random_state=RANDOM_SEED)
     restarts = _effective_n_init(template)
-    probe_rng = np.random.RandomState()
-    probe_rng.set_state(np.random.get_state())
+    # RNG độc lập và có seed cố định: cùng input luôn duyệt cùng chuỗi khởi tạo K-means++.
+    probe_rng = np.random.RandomState(RANDOM_SEED)
     all_runs_raw = []
     for restart_index in range(restarts):
         # Preserve the public sklearn initializer as the authoritative result;
@@ -2597,6 +2786,34 @@ def run_pipeline(payload):
 
     best_run_index = min(range(len(all_runs_raw)), key=lambda i: all_runs_raw[i]["inertia"])
     best_run = all_runs_raw[best_run_index]
+
+    # In báo cáo hội tụ ra terminal mỗi khi người dùng chạy pipeline.
+    # Mỗi lần khởi tạo được in riêng vì KMeans so sánh các lần chạy bằng inertia.
+    print("\n" + "=" * 76)
+    print("[K-MEANS] BÁO CÁO ĐIỀU KIỆN DỪNG")
+    print(f"Số cụm K={n_clusters} | số lần khởi tạo={len(all_runs_raw)} | "
+          f"tol={template.tol:g} | max_iter={template.max_iter}")
+    print(f"Ngưỡng dịch tâm² thực tế: tolerance={tol:.10g}")
+    for run_index, run_data in enumerate(all_runs_raw):
+        run_history = run_data.get("history") or []
+        last_frame = run_history[-1] if run_history else {}
+        iterations_done = int(getattr(run_data.get("model"), "n_iter_", max(0, len(run_history) - 1)))
+        if last_frame.get("converged"):
+            stop_status = "ĐÃ HỘI TỤ"
+            stop_reason = last_frame.get("convergence_reason") or "Đã thỏa điều kiện hội tụ của Lloyd."
+        else:
+            stop_status = "DỪNG DO GIỚI HẠN VÒNG LẶP"
+            last_check = last_frame.get("convergence_reason") or "Không có thông tin điều kiện cuối."
+            stop_reason = (f"Đạt max_iter={template.max_iter} khi chưa hội tụ. "
+                           f"Kiểm tra ở vòng cuối: {last_check}")
+        best_marker = " [LẦN ĐƯỢC CHỌN]" if run_index == best_run_index else ""
+        print(f"\nLần khởi tạo {run_index + 1}{best_marker}: {stop_status}")
+        print(f"  Số vòng Lloyd: {iterations_done}")
+        print(f"  Inertia: {run_data['inertia']:.10g}")
+        print(f"  Lý do dừng: {stop_reason}")
+        print(f"  Trace khớp với kết quả scikit-learn: {run_data.get('trace_matches', False)}")
+    print("=" * 76 + "\n")
+
     seed_indices = best_run["seed_indices"]
     history = best_run["history"]
     traced_centers = best_run["centers"]
@@ -2652,7 +2869,7 @@ def run_pipeline(payload):
 
     # PCA is only for drawing; assignment, distance, and centroid updates stay
     # in the original 256-dimensional Word2Vec space.
-    pca = PCA(n_components=2)
+    pca = PCA(n_components=2, svd_solver="full")
     pca_sentences = pca.fit_transform(X)
 
     total_trace_frames = sum(len(run["history"]) for run in all_runs_raw)
@@ -2730,6 +2947,7 @@ def run_pipeline(payload):
             "text": sentence.getOGwords(), "tokens": sentence.getProcessedWords(),
 
             "doc": source_doc[i], "doc_label": "Tài liệu " + str(source_doc[i] + 1),
+            "input_position": source_positions[i] + 1,
 
             "x": _json_number(pca_sentences[i][0]), "y": _json_number(pca_sentences[i][1]),
             "vector_preview": [_json_number(v) for v in X[i][:8]],
@@ -3129,11 +3347,17 @@ def run_pipeline(payload):
 
     mmr_strings = [item.getOGwords() for item in summary]
 
-    final_target = min(4, n_clusters)
+    requested_length = payload.get("summary_length", 4)
+    if requested_length is None:
+        requested_length = 16
+    if isinstance(requested_length, bool) or not isinstance(requested_length, int) or not 1 <= requested_length <= 16:
+        raise ValueError("Số câu phải là số nguyên từ 1 đến 16, hoặc để trống để tự động.")
+    final_target = min(requested_length, n_clusters, len(new_sents))
+    mmr_for_final = mmr_strings[:final_target] if "summary_length" in payload else mmr_strings
 
     final_index = Summarizer(n_clusters=n_clusters, len_summary=final_target).add_position(
 
-        new_sents, mmr_strings, final_target, index_sents, n_clusters
+        new_sents, mmr_for_final, final_target, index_sents, n_clusters
 
     )
 
