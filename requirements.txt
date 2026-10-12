@@ -1,2 +1,5 @@
+# Deploy on Python 3.13. Gensim 4.4.0 has no Linux wheel for Python 3.14.
+# Avoid falling back to a source build that fails against Python 3.14's C API.
+--only-binary=gensim
 -r web_visualizer/requirements.txt
 streamlit==1.65.0

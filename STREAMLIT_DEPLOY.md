@@ -25,6 +25,10 @@ Nếu Python của môi trường ảo đã bị gỡ/đổi đường dẫn, t�
 4. **Main file path:** `streamlit_app.py` (nằm ở thư mục gốc).
 5. Trong **Advanced settings**, chọn Python **3.13**, rồi **Deploy**.
 
+**Phải chọn Python 3.13 trước khi Deploy.** Phiên bản Python của app trên
+Community Cloud được chọn trong giao diện Cloud, không được thay đổi bằng
+`requirements.txt` hoặc thao tác Reboot.
+
 Cloud cài thư viện từ `requirements.txt` ở thư mục gốc. `.streamlit/config.toml`
 cấu hình giao diện và giới hạn file; không có secret cần nhập cho thuật toán này.
 Không cần upload `.venv`, dataset `Data/ViMs`, file đánh giá ROUGE hoặc ảnh chụp giao diện.
@@ -40,6 +44,24 @@ Tài liệu chính thức: [Deploy your app](https://docs.streamlit.io/deploy/st
 - `web_visualizer/streamlit_bridge.py` chuyển dữ liệu sang các handler hiện có bằng Flask test client trong cùng tiến trình.
 - Custom Component v2 chuyển yêu cầu và kết quả giữa giao diện và Streamlit; không gửi HTTP đến localhost của máy người xem.
 - Phiên bản các thư viện được cố định để giữ trace K-means tương thích.
+
+## Sửa lỗi `Failed to build gensim` trên Python 3.14
+
+Nếu log ghi `Using Python 3.14.x` và `Failed to build gensim==4.4.0`, nguyên nhân
+là Gensim 4.4.0 không có Linux wheel cho CPython 3.14. Cloud chuyển sang biên dịch
+mã C, rồi lỗi do C API của Python 3.14. Gensim có Linux wheel cho Python 3.13.
+
+1. Ghi lại subdomain, repository, branch, entry point và secrets (nếu đã nhập).
+2. Xóa **app bị lỗi trên Streamlit Cloud**, không xóa repository GitHub.
+3. Tạo app lại với repository và branch `codex/deploy-streamlit`, file `streamlit_app.py`.
+4. Mở **Advanced settings → Python version → 3.13 → Save**, sau đó **Deploy**.
+5. Xác nhận log mới ghi `Using Python 3.13.x` và tải file Gensim dạng `cp313...manylinux...whl`.
+
+Root requirements sử dụng `--only-binary=gensim` để tránh biên dịch nhầm phiên bản.
+Nếu vẫn chọn Python 3.14, tùy chọn này sẽ báo không có bản phù hợp; nó không tự
+đổi Python của app. Chỉ reboot/push code không thay đổi Python đã chọn trên Cloud.
+
+Hướng dẫn chính thức: [Đổi phiên bản Python trên Community Cloud](https://docs.streamlit.io/deploy/streamlit-community-cloud/manage-your-app/upgrade-python).
 
 ## Kiểm tra
 
