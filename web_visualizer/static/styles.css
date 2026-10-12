@@ -615,3 +615,62 @@ input:focus {
     grid-template-columns: 1fr;
   }
 }
+/* Workspace and algorithm walkthrough */
+.app-shell { padding: 26px; }
+.app-topbar, .workspace { max-width: 1800px; }
+.workspace { grid-template-columns: minmax(280px, var(--input-width, 32%)) 18px minmax(0, 1fr); gap: 0; align-items: start; }
+.input-pane, .result-pane { border-radius: 16px; }
+.input-pane { padding: 22px; }
+.result-pane { min-width: 0; }
+.splitter { display: grid; place-items: center; min-height: calc(100vh - 130px); cursor: col-resize; touch-action: none; color: #879da8; }
+.splitter span { display: grid; place-items: center; width: 12px; height: 64px; background: #e1e8eb; border-radius: 8px; }
+.splitter:hover span, .splitter:focus-visible span { color: white; background: var(--accent); }
+.is-resizing { cursor: col-resize; user-select: none; }
+.input-hint { font-size: 12px; color: var(--muted); line-height: 1.6; margin: 10px 0; }
+.controls { align-items: end; }
+.result-header { padding: 20px; background: #f8fbfb; }
+.step-tabs { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.step-tab { flex-direction: column; align-items: flex-start; min-height: 84px; border-color: transparent; background: transparent; }
+.step-tab strong { font-size: 12px; }
+.step-panel { padding: 24px; }
+.explanation { padding: 18px 20px; background: #edf7f5; border-left: 4px solid var(--accent); border-radius: 8px; margin-bottom: 16px; line-height: 1.7; }
+.explanation strong { font-size: 16px; }
+.explanation p { color: #486560; margin: 6px 0 0; font-size: 13px; }
+.empty-state { text-align: center; padding: 28px; min-height: 340px; }
+.empty-state p { font-size: 14px; font-weight: 400; }
+.cluster-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 14px; }
+.cluster-grid > .explanation { grid-column: 1 / -1; }
+.cluster-card { padding: 18px; border: 1px solid var(--line); border-top: 4px solid var(--cluster-color); border-radius: 12px; background: #fff; min-width: 0; }
+.cluster-card .cluster-pill { color: var(--cluster-color); background: #f0f4f5; }
+.cluster-dots { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cluster-color); opacity: .35; }
+.dot.representative { opacity: 1; outline: 2px solid var(--cluster-color); outline-offset: 2px; }
+.cluster-card p { margin: 8px 0 14px; font-size: 14px; }
+summary { cursor: pointer; color: var(--accent); padding: 8px 0; font-size: 12px; font-weight: 700; }
+details .term-cloud { margin-top: 8px; }
+.member-row { border-top: 1px solid var(--line); padding-top: 10px; margin-top: 8px; }
+.ranking-row { display: grid; grid-template-columns: 70px minmax(0,1fr) 104px; align-items: start; gap: 14px; padding: 18px; border: 1px solid var(--line); border-radius: 10px; }
+.ranking-row p { margin: 0 0 12px; }
+.score-meter { height: 6px; background: #e8eeee; overflow: hidden; border-radius: 8px; margin: 8px 0; }
+.score-meter i { display: block; height: 100%; background: var(--accent); }
+.decision { color: var(--muted); font-size: 12px; padding: 6px 8px; border-radius: 6px; background: #f0f4f5; }
+.is-selected .decision { color: var(--accent); background: var(--accent-soft); }
+.sentence-row, .mmr-row, .summary-row { padding: 18px; border-radius: 10px; }
+.doc-name, .meta, .file-chip { overflow-wrap: anywhere; }
+button:focus-visible, summary:focus-visible, .splitter:focus-visible { outline: 3px solid #6ac9bb; outline-offset: 3px; }
+.file-picker:focus-within { outline: 3px solid #6ac9bb; }
+@media (max-width: 900px) {
+  .workspace { grid-template-columns: 1fr; gap: 18px; }
+  .splitter { display: none; }
+  .input-pane { position: static; max-height: none; }
+}
+@media (min-width: 901px) { .input-pane { position: sticky; max-height: calc(100vh - 36px); } }
+@media (max-width: 720px) {
+  .app-shell { padding: 12px; }
+  .step-tabs { grid-template-columns: repeat(5, minmax(0,1fr)); }
+  .step-tab { padding: 6px 2px; }
+  .step-tab strong { font-size: 10px; }
+  .step-panel, .result-header { padding: 14px; }
+  .ranking-row { grid-template-columns: 1fr; }
+}
+.step-tab.is-active:hover:not(:disabled) { background: var(--accent-strong); border-color: var(--accent-strong); color: #fff; }

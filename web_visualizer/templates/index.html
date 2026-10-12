@@ -20,11 +20,11 @@
         </div>
       </header>
 
-      <section class="workspace">
+      <section class="workspace" id="workspace">
         <aside class="input-pane" aria-label="Nguồn văn bản">
           <div class="pane-header">
             <div>
-              <p class="eyebrow">Input</p>
+              <p class="eyebrow">Văn bản đầu vào</p>
               <h2>Nguồn dữ liệu</h2>
             </div>
             <button class="icon-button" id="addTextBtn" type="button" title="Thêm văn bản">+</button>
@@ -50,13 +50,15 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
           <div class="controls">
             <label>
               <span>Số câu tóm tắt</span>
-              <input id="summaryLength" type="number" min="1" max="20" value="6">
+              <input id="summaryLength" type="number" min="1" max="16" placeholder="Tự động" aria-describedby="lengthHint">
             </label>
             <button id="runBtn" class="primary-button" type="button">Chạy</button>
           </div>
+          <p id="lengthHint" class="input-hint">Để trống: tự chọn 3–10 câu theo số câu hợp lệ. Nhập số: chọn tối đa số câu đại diện.</p>
           <p id="status" class="status" aria-live="polite"></p>
         </aside>
 
+        <div id="splitter" class="splitter" role="separator" tabindex="0" aria-label="Kéo để đổi chiều rộng vùng nhập" aria-orientation="vertical" aria-valuemin="24" aria-valuemax="60" aria-valuenow="32" title="Kéo trái/phải · phím mũi tên · nhấp đúp để đặt lại"><span>⋮</span></div>
         <section class="result-pane" aria-label="Kết quả trực quan">
           <div class="result-header">
             <nav class="step-tabs" aria-label="Các bước">
@@ -68,13 +70,14 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
                 <span>2</span>
                 <strong>KMeans</strong>
               </button>
+              <button class="step-tab" data-step="centroid" type="button" disabled><span>3</span><strong>Centroid</strong></button>
               <button class="step-tab" data-step="mmr" type="button" disabled>
-                <span>3</span>
+                <span>4</span>
                 <strong>MMR</strong>
               </button>
               <button class="step-tab" data-step="summary" type="button" disabled>
-                <span>4</span>
-                <strong>Output</strong>
+                <span>5</span>
+                <strong>Vị trí & kết quả</strong>
               </button>
             </nav>
 
@@ -89,32 +92,36 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
           <section class="step-panel is-active" id="preprocessPanel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Step 1</p>
+                <p class="eyebrow">Bước 1</p>
                 <h2>Câu và từ khóa</h2>
               </div>
               <button class="secondary-button next-step" data-next="clusters" type="button" disabled>KMeans</button>
             </div>
-            <div id="preprocessView" class="empty-state">Chưa có dữ liệu.</div>
+            <div id="preprocessView" class="empty-state"><div><h3>Từ văn bản đến bản tóm tắt</h3><p>Nhập hoặc tải lên các tài liệu, rồi nhấn Chạy.</p><p>Khám phá 5 bước và xem vì sao mỗi câu được chọn.</p></div></div>
           </section>
 
           <section class="step-panel" id="clustersPanel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Step 2</p>
+                <p class="eyebrow">Bước 2</p>
                 <h2>Cụm câu đại diện</h2>
               </div>
-              <button class="secondary-button next-step" data-next="mmr" type="button" disabled>MMR</button>
+              <button class="secondary-button next-step" data-next="centroid" type="button" disabled>Centroid</button>
             </div>
             <div id="clusterView" class="empty-state">Chưa có dữ liệu.</div>
           </section>
 
+          <section class="step-panel" id="centroidPanel">
+            <div class="section-heading"><div><p class="eyebrow">Bước 3</p><h2>Chọn câu gần chủ đề chung</h2></div><button class="secondary-button next-step" data-next="mmr" type="button" disabled>Tiếp: MMR →</button></div>
+            <div id="centroidView" class="empty-state">Chưa có dữ liệu.</div>
+          </section>
           <section class="step-panel" id="mmrPanel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Step 3</p>
+                <p class="eyebrow">Bước 4</p>
                 <h2>Xếp hạng MMR</h2>
               </div>
-              <button class="secondary-button next-step" data-next="summary" type="button" disabled>Output</button>
+              <button class="secondary-button next-step" data-next="summary" type="button" disabled>Tiếp: kết quả →</button>
             </div>
             <div id="mmrView" class="empty-state">Chưa có dữ liệu.</div>
           </section>
@@ -122,10 +129,10 @@ Máy bay MS804 của EgyptAir mất liên lạc khi đang trên đường từ P
           <section class="step-panel" id="summaryPanel">
             <div class="section-heading">
               <div>
-                <p class="eyebrow">Step 4</p>
+                <p class="eyebrow">Bước 5</p>
                 <h2>Bản tóm tắt và highlight</h2>
               </div>
-              <button id="copyBtn" class="secondary-button" type="button" disabled>Copy</button>
+              <button id="copyBtn" class="secondary-button" type="button" disabled>Sao chép</button>
             </div>
             <div id="summaryView" class="empty-state">Chưa có dữ liệu.</div>
             <div id="sourceView" class="source-view"></div>

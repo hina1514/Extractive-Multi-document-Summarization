@@ -1,10 +1,13 @@
 import os
 import re
 import sys
+import math
 import unicodedata
 from pathlib import Path
 
 from flask import Flask, jsonify, render_template, request
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfTransformer
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -12,6 +15,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from methods.main_method.Kmeans_CentroidBase_MMR_SentencePosition import Summarizer
+from methods.centroid.centroid_summarizer import CentroidBow
 from methods.maximal_marginal_relevance.mmr_summarizer import MMR
 from utils.sentence import Sentence
 
@@ -211,12 +215,68 @@ def choose_cluster_count(sentence_count):
 
 def top_terms_from_existing_mmr(sentence_objects, limit=24):
     terms = []
-    for score in sorted(MMR.TF_IDF(sentence_objects).keys(), reverse=True):
-        for word in MMR.TF_IDF(sentence_objects)[score]:
+    weights = MMR.TF_IDF(sentence_objects)
+    for score in sorted(weights.keys(), reverse=True):
+        for word in weights[score]:
             terms.append({"term": word, "weight": float(score)})
             if len(terms) == limit:
                 return terms
     return terms
+
+
+def centroid_scores(clean_sentences):
+    vectorizer = CountVectorizer(stop_words="english")
+    sentence_matrix = vectorizer.fit_transform(clean_sentences)
+    tfidf = TfidfTransformer(norm=None, sublinear_tf=False, smooth_idf=False).fit_transform(
+        sentence_matrix
+    ).toarray()
+    centroid = tfidf.sum(0)
+    maximum = centroid.max()
+    if maximum:
+        centroid = centroid / maximum
+    centroid[centroid <= 0.3] = 0
+    return [float(CentroidBow.similarity(row, centroid)) for row in tfidf]
+
+
+def finite_score(value):
+    return float(value) if math.isfinite(value) else 0.0
+
+
+def mmr_scores(object_sents, index_sents, mmr_summaries):
+    candidates = [object_sents[index] for index in index_sents]
+    if not candidates:
+        return {}
+
+    idf = MMR.IDFs(candidates)
+    query = candidates[0]
+    selected = [candidates[0]]
+    scores = {
+        id(candidates[0]): {
+            "relevance": finite_score(MMR.sentenceSim(candidates[0], query, idf)),
+            "redundancy": 0.0,
+            "mmrScore": finite_score(MMR.sentenceSim(candidates[0], query, idf)),
+        }
+    }
+
+    remaining = candidates[1:]
+    for text in mmr_summaries[1:]:
+        candidate = next((item for item in remaining if item.getOGwords() == text), None)
+        if candidate is None:
+            continue
+        remaining.remove(candidate)
+        relevance = MMR.sentenceSim(candidate, query, idf)
+        redundancy = max(
+            MMR.sentenceSim(candidate, previous, idf)
+            for previous in selected
+        )
+        scores[id(candidate)] = {
+            "relevance": finite_score(relevance),
+            "redundancy": finite_score(redundancy),
+            "mmrScore": finite_score(0.6 * relevance - 0.4 * redundancy),
+        }
+        selected.append(candidate)
+
+    return scores
 
 
 def index_mmr_summaries(new_sents, mmr_summaries):
@@ -233,55 +293,56 @@ def index_mmr_summaries(new_sents, mmr_summaries):
     return indexes
 
 
-def summarize(documents, requested_summary_length):
+def summarize(documents, requested_summary_length=None):
     sentence_objects, sentence_records, last_indexs = preprocess_documents(documents)
-    if len(sentence_objects) < 5:
-        raise ValueError("Pipeline gốc cần ít nhất 5 câu hợp lệ để chạy KMeans/Centroid/MMR.")
+    if not sentence_objects:
+        raise ValueError("Không tìm thấy câu hợp lệ để tóm tắt. Mỗi câu cần có ít nhất 5 từ.")
 
     text_sents = [sentence.getProcessedWords() for sentence in sentence_objects]
     org_sents = [sentence.getOGwords() for sentence in sentence_objects]
     sentence_count = len(sentence_objects)
 
     n_clusters = min(choose_cluster_count(sentence_count), sentence_count)
-    summary_length = min(max(1, requested_summary_length), n_clusters)
+    summary_length = min(requested_summary_length or 16, 16, n_clusters)
 
     summarizer = Summarizer(n_clusters=n_clusters, len_summary=summary_length)
 
-    new_sents, object_sents = summarizer.kmean_summarizer(
+    new_sents, object_sents, cluster_trace = summarizer.kmean_summarizer(
         sentence_objects,
         text_sents,
         org_sents,
         last_indexs,
         n_clusters,
+        return_trace=True,
     )
 
     object_to_original = {id(sentence): index for index, sentence in enumerate(sentence_objects)}
     candidate_to_original = [object_to_original[id(sentence)] for sentence in object_sents]
     raw_sentences = [sentence.getOGwords() for sentence in object_sents]
 
-    len_centroid = min(20, len(new_sents))
-    index_sents = summarizer.centroid_summarizer(raw_sentences, new_sents, len_centroid)
+    index_sents = summarizer.centroid_summarizer(raw_sentences, new_sents, 20)
     if not index_sents:
         index_sents = list(range(len(object_sents)))
 
     mmr_summaries = summarizer.mmr_summarizer(
         object_sents,
         index_sents,
-        mode="web",
-        length_sentence=summary_length,
+        mode="train",
     )
     mmr_candidate_indexes = index_mmr_summaries(new_sents, mmr_summaries)
+    centroid_score_by_index = centroid_scores(new_sents)
+    mmr_score_by_object = mmr_scores(object_sents, index_sents, mmr_summaries)
 
     final_candidate_indexes = summarizer.add_position(
         new_sents,
-        mmr_summaries,
+        mmr_summaries[:summary_length],
         summary_length,
         index_sents,
         n_clusters,
     )
     final_candidate_indexes = [
         index for index in final_candidate_indexes if 0 <= index < len(candidate_to_original)
-    ]
+    ][:summary_length]
     selected_original_indexes = [
         candidate_to_original[index] for index in final_candidate_indexes
     ]
@@ -291,23 +352,29 @@ def summarize(documents, requested_summary_length):
     }
 
     for sentence_index, record in enumerate(sentence_records):
-        record["cluster"] = None
+        record["cluster"] = cluster_trace["labels"][sentence_index] + 1
         record["selected"] = sentence_index in selected_order
         record["selectedOrder"] = selected_order.get(sentence_index)
         record["mmrScore"] = None
 
     clusters = []
+    remaining_clusters = list(range(n_clusters))
     for candidate_index, original_index in enumerate(candidate_to_original):
-        sentence_records[original_index]["cluster"] = candidate_index + 1
+        cluster_index = next(i for i in remaining_clusters
+                             if cluster_trace["representatives"][i] == original_index)
+        remaining_clusters.remove(cluster_index)
+        members = [record["id"] for i, record in enumerate(sentence_records)
+                   if cluster_trace["labels"][i] == cluster_index]
         clusters.append(
             {
-                "cluster": candidate_index + 1,
+                "cluster": cluster_index + 1,
                 "sentenceIndex": original_index,
                 "sentenceId": sentence_records[original_index]["id"],
-                "size": None,
-                "score": None,
-                "avgPosition": float(sentence_records[original_index]["globalPosition"]),
-                "members": [sentence_records[original_index]["id"]],
+                "size": len(members),
+                "score": centroid_score_by_index[candidate_index],
+                "avgPosition": cluster_trace["averagePositions"][cluster_index],
+                "members": members,
+                "candidateIndex": candidate_index,
                 "selected": candidate_index in final_candidate_indexes,
                 "selectedOrder": selected_order.get(original_index),
                 "centroidSelected": candidate_index in index_sents,
@@ -320,14 +387,15 @@ def summarize(documents, requested_summary_length):
         if candidate_index >= len(candidate_to_original):
             continue
         original_index = candidate_to_original[candidate_index]
+        score = mmr_score_by_object.get(id(object_sents[candidate_index]), {})
         mmr_steps.append(
             {
                 "sentenceIndex": original_index,
                 "candidateIndex": candidate_index,
                 "order": step_order,
-                "relevance": None,
-                "redundancy": None,
-                "mmrScore": None,
+                "relevance": score.get("relevance", 0.0),
+                "redundancy": score.get("redundancy", 0.0),
+                "mmrScore": score.get("mmrScore", 0.0),
             }
         )
 
@@ -341,6 +409,7 @@ def summarize(documents, requested_summary_length):
                 "text": sentence_records[original_index]["text"],
                 "order": display_index,
                 "displayOrder": display_index,
+                "reason": "mmr" if candidate_index in mmr_candidate_indexes else "position",
             }
         )
 
@@ -369,6 +438,11 @@ def summarize(documents, requested_summary_length):
             "clusterCount": n_clusters,
             "candidateCount": len(candidate_to_original),
             "vocabularySize": len(vocabulary),
+            "summaryMode": "auto" if requested_summary_length is None else "manual",
+            "requestedSummaryLength": requested_summary_length,
+            "targetSummaryLength": summary_length,
+            "centroidCount": len(index_sents),
+            "mmrCount": len(mmr_candidate_indexes),
         },
         "steps": {
             "preprocess": {
@@ -393,7 +467,13 @@ def api_summarize():
     try:
         texts = request.form.getlist("texts")
         files = request.files.getlist("files")
-        summary_length = int(request.form.get("summaryLength", "6"))
+        raw_length = request.form.get("summaryLength", "").strip()
+        try:
+            summary_length = int(raw_length) if raw_length else None
+        except ValueError:
+            raise ValueError("Số câu phải là số nguyên từ 1 đến 16, hoặc để trống để tự động.")
+        if summary_length is not None and not 1 <= summary_length <= 16:
+            raise ValueError("Số câu phải từ 1 đến 16, hoặc để trống để tự động.")
         documents = build_documents(texts, files)
 
         if not documents:
