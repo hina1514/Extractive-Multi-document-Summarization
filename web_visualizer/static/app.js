@@ -53,6 +53,7 @@ function unlockSteps() {
     button.disabled = false;
   });
   copyBtn.disabled = false;
+  document.querySelector("#applyLambdaBtn").disabled = false;
 }
 
 function addTextBox(value = "") {
@@ -148,6 +149,7 @@ function renderCentroid(data) {
 }
 
 function renderMmr(data) {
+  const lambda = data.stats.lambda;
   const container = document.querySelector("#mmrView");
   const sentences = data.steps.preprocess.sentences;
   const rows = data.steps.mmr
@@ -171,7 +173,7 @@ function renderMmr(data) {
     .join("");
 
   container.className = "mmr-list";
-  container.innerHTML = explain("MMR = 0,6 × liên quan − 0,4 × trùng lặp", `Chọn câu đầu trong danh sách Centroid làm câu mốc. Mỗi lượt tiếp theo ưu tiên liên quan với câu mốc và phạt độ giống với câu đã chọn. Chế độ train của file gốc giữ tối thiểu câu mốc, với mục tiêu bằng số ứng viên Centroid trừ 4. Đang giữ ${data.stats.mmrCount} câu.`) + rows;
+  container.innerHTML = explain(`MMR = ${lambda} × liên quan − ${(1 - lambda).toFixed(2)} × trùng lặp`, `Chọn câu đầu trong danh sách Centroid làm câu mốc. Mỗi lượt tiếp theo ưu tiên liên quan với câu mốc và phạt độ giống với câu đã chọn. Chế độ train của file gốc giữ tối thiểu câu mốc, với mục tiêu bằng số ứng viên Centroid trừ 4. Đang giữ ${data.stats.mmrCount} câu.`) + rows;
 }
 
 function renderSummary(data) {
@@ -232,7 +234,10 @@ function renderAll(data) {
   activateStep("preprocess");
 }
 
-async function runSummarizer() {
+async function runSummarizer(nextStep = "preprocess") {
+  if (typeof nextStep !== "string") nextStep = "preprocess";
+  const lambdaInput = document.querySelector("#overviewLambda");
+  if (viewMode === "overview" && !lambdaInput.checkValidity()) { lambdaInput.reportValidity(); return; }
   if (!summaryLength.checkValidity()) { summaryLength.reportValidity(); return; }
   if (viewMode === "demo") {
     for (const field of document.querySelectorAll("#demoSettings input")) {
@@ -255,8 +260,11 @@ async function runSummarizer() {
     formData.append("mode", document.querySelector("#demoMode").value);
     formData.append("lambda", document.querySelector("#demoLambda").value);
     formData.append("cosineThreshold", document.querySelector("#demoCosine").value);
+  } else {
+    formData.append("lambda", lambdaInput.value);
   }
   runBtn.disabled = true;
+  document.querySelector("#applyLambdaBtn").disabled = true;
   document.querySelector("#overviewModeBtn").disabled = true;
   document.querySelector("#demoModeBtn").disabled = true;
   document.querySelector(".result-pane").setAttribute("aria-busy", "true");
@@ -282,16 +290,20 @@ async function runSummarizer() {
         [payload.documents, "tài liệu"], [payload.sentences.length, "câu hợp lệ"],
         [payload.kmeans.k, "cụm K-means"], [payload.final.length, "câu tóm tắt"]
       ].map(([value, label]) => `<div><strong>${value}</strong><span>${label}</span></div>`).join("");
-      setStatus(`Đã tính demo · ${payload.final.length} câu tóm tắt. Dùng Trước/Tiếp hoặc Tự chạy để khám phá.`);
+      const counts = window.PipelineDemo.stepCounts();
+      setStatus(`Đã tính demo · ${counts.source} bước gốc + 1 bước Sort = ${counts.total} bước · ${payload.final.length} câu tóm tắt.`);
     } else {
       resultData = payload;
       renderAll(payload);
+      activateStep(nextStep);
+      document.querySelector("#lambdaStatus").textContent = `λ đang dùng: ${payload.stats.lambda}`;
       setStatus(`Đã tạo ${payload.stats.summaryLength} câu · ${payload.stats.summaryMode === "auto" ? "chế độ tự động" : "theo số câu yêu cầu"}.`);
     }
   } catch (error) {
     setStatus(error.message, true);
   } finally {
     runBtn.disabled = false;
+    document.querySelector("#applyLambdaBtn").disabled = !resultData;
     document.querySelector("#overviewModeBtn").disabled = false;
     document.querySelector("#demoModeBtn").disabled = false;
     document.querySelector(".result-pane").setAttribute("aria-busy", "false");
@@ -379,9 +391,14 @@ function loadDemoSample() {
   textInputs.innerHTML = "";
   inputCount = 0;
   window.PipelineDemo.sample().forEach(addTextBox);
+  const defaults = window.PipelineDemo.defaults;
+  document.querySelector("#demoK").value = defaults.clusters;
+  document.querySelector("#demoLambda").value = defaults.lambda;
+  document.querySelector("#demoCosine").value = defaults.cosineThreshold;
+  document.querySelector("#demoMode").value = "train";
   fileInput.value = "";
   renderFiles();
-  setStatus("Đã nạp mẫu 3 tài liệu. Nhấn Chạy để xem demo.");
+  setStatus(`Đã nạp mẫu và tham số gốc (K = ${defaults.clusters}). Nhấn Chạy để xem demo.`);
 }
 document.querySelector("#overviewModeBtn").addEventListener("click", () => setViewMode("overview"));
 document.querySelector("#demoModeBtn").addEventListener("click", () => setViewMode("demo"));
@@ -402,3 +419,9 @@ document.addEventListener("keydown", event => {
   window.PipelineDemo.move(event.key === "ArrowLeft" ? -1 : 1);
 });
 window.addEventListener("pagehide", () => window.PipelineDemo.stop());
+
+const overviewLambda = document.querySelector("#overviewLambda");
+const overviewLambdaRange = document.querySelector("#overviewLambdaRange");
+overviewLambdaRange.addEventListener("input", () => { overviewLambda.value = overviewLambdaRange.value; });
+overviewLambda.addEventListener("input", () => { if (overviewLambda.checkValidity()) overviewLambdaRange.value = overviewLambda.value; });
+document.querySelector("#applyLambdaBtn").addEventListener("click", () => runSummarizer("mmr"));

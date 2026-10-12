@@ -2,6 +2,9 @@
 import io
 import re
 import unittest
+import tempfile
+import os
+from pathlib import Path
 from unittest.mock import patch
 
 from web_visualizer.app import app
@@ -40,6 +43,29 @@ class PipelineDemoTests(unittest.TestCase):
         self.assertIn(b"window.PipelineDemo", script.data)
         self.assertNotIn(b"$('run').onclick=async", script.data)
         self.assertIn(b"@scope (#interactiveDemo)", self.client.get("/demo/assets.css").data)
+        self.assertEqual(script.headers['Cache-Control'], 'no-store')
+
+    def test_source_defaults_and_theme_match_web(self):
+        from web_visualizer.pipeline_demo import demo_defaults, demo_styles
+        defaults = demo_defaults()
+        page = self.client.get('/').get_data(as_text=True)
+        self.assertIn(f'value="{defaults["clusters"]}" placeholder="Tự động"', page)
+        self.assertIn('--blue:#0f766e', demo_styles())
+        self.assertNotIn('#3020b8', demo_styles().lower())
+
+    def test_source_reload_updates_backend_and_defaults_together(self):
+        from web_visualizer.pipeline_demo import demo_defaults, demo_module
+        with tempfile.TemporaryDirectory(dir=Path(__file__).parent) as directory:
+            source = Path(directory) / 'demo.py'
+            source.write_text('PAGE = \'<input id="custom-k" value="6">\'\ndef run_pipeline(payload): return 6\n', encoding='utf-8')
+            with patch('web_visualizer.pipeline_demo.DEMO_PATH', source):
+                self.assertEqual(demo_defaults()['clusters'], '6')
+                self.assertEqual(demo_module().run_pipeline({}), 6)
+                previous = source.stat().st_mtime_ns
+                source.write_text('PAGE = \'<input id="custom-k" value="4">\'\ndef run_pipeline(payload): return 4\n', encoding='utf-8')
+                os.utime(source, ns=(previous + 1000000, previous + 1000000))
+                self.assertEqual(demo_defaults()['clusters'], '4')
+                self.assertEqual(demo_module().run_pipeline({}), 4)
 
     def test_upload_trace_and_manual_summary_limit(self):
         response = self.client.post("/api/pipeline", data={

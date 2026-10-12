@@ -27,9 +27,10 @@ http://127.0.0.1:5000
 1. `Tiền xử lý`: tách câu, chuẩn hóa, token hóa tiếng Việt, bỏ câu có tối đa 4 token. Mở từng câu để xem token.
 2. `KMeans`: Word2Vec 256 chiều, cộng vector từ thành vector câu, gom cụm và chọn câu gần tâm. Mỗi thẻ hiển thị số thành viên thực tế, mở rộng để đọc các câu trong cụm.
 3. `Centroid`: chấm điểm TF-IDF theo chủ đề chung và lọc câu quá giống nhau (ngưỡng 0,95). Thanh điểm và nhãn cho biết câu được giữ.
-4. `MMR`: hiển thị thứ tự chọn thực tế, điểm liên quan và trùng lặp với công thức λ = 0,6. Câu đầu là câu mốc; chế độ train dùng mục tiêu số ứng viên Centroid trừ 4, tối thiểu giữ câu mốc.
-5. `Chọn & bổ sung`: giữ câu MMR, bổ sung câu theo vị trí đến độ dài mục tiêu; hiển thị tập câu trước Sort.
-6. `Sort & kết quả`: sắp theo thứ tự tài liệu nhập vào và vị trí câu trong tài liệu; đối chiếu trước–sau, tô vàng câu được chọn và sao chép bản đã Sort.
+4. `Điều chỉnh λ`: chọn λ từ 0–1 (mặc định 0,6), nhấn Áp dụng để tính lại và mở kết quả MMR.
+5. `MMR`: hiển thị thứ tự chọn thực tế, điểm liên quan và trùng lặp với công thức λ = 0,6. Câu đầu là câu mốc; chế độ train dùng mục tiêu số ứng viên Centroid trừ 4, tối thiểu giữ câu mốc.
+6. `Chọn & bổ sung`: giữ câu MMR, bổ sung câu theo vị trí đến độ dài mục tiêu; hiển thị tập câu trước Sort.
+7. `Sort & kết quả`: sắp theo thứ tự tài liệu nhập vào và vị trí câu trong tài liệu; đối chiếu trước–sau, tô vàng câu được chọn và sao chép bản đã Sort.
 
 ## Số câu và bố cục
 
@@ -55,7 +56,7 @@ http://127.0.0.1:5000
 Chọn **Demo tương tác** ở đầu vùng kết quả. Phần này chạy trực tiếp `run_pipeline` và dùng lại các cảnh mô phỏng của `methods/main_method/interactive_pipeline_demo.py`, trong cùng web Flask; không cần chạy thêm server cổng 8765.
 
 - Nhập văn bản hoặc tải file như chế độ tổng quan. Có nút **Nạp mẫu 3 tài liệu** để thử nhanh.
-- Tham số demo gồm K (mặc định 8; xóa để tự động), λ MMR, chế độ train/test và ngưỡng cosine. Centroid demo dùng cosine + lọc trùng, khác với chế độ tổng quan dùng CentroidBow gốc.
+- Tham số demo gồm K (lấy mặc định trực tiếp từ file demo; hiện là 6; xóa để tự động), λ MMR, chế độ train/test và ngưỡng cosine. Centroid demo dùng cosine + lọc trùng, khác với chế độ tổng quan dùng CentroidBow gốc.
 - Ô số câu tóm tắt dùng chung: để trống lấy tối đa số đại diện có sẵn; nhập 1–16 để giới hạn đầu ra. Số ứng viên MMR trong mô phỏng vẫn phản ánh chế độ train/test; giới hạn được áp dụng khi tạo kết quả cuối.
 - Sáu giai đoạn: Đầu vào & biểu diễn → K-means → Câu đại diện → Centroid → MMR → Kết quả. Dùng Trước/Tiếp, phím ←/→ ngoài ô nhập, hoặc Tự chạy và chỉnh tốc độ. Các cảnh K-means có điều khiển riêng để xem gán từng câu và dịch chuyển tâm.
 - Chuyển chế độ sẽ dừng mô phỏng và giữ kết quả của mỗi chế độ. Nhấn **Chạy** sau khi đổi nội dung/tham số để tính lại.
@@ -63,4 +64,10 @@ Chọn **Demo tương tác** ở đầu vùng kết quả. Phần này chạy tr
 
 `web_visualizer/pipeline_demo.py` chuyển renderer từ file demo thành asset có phạm vi riêng để giữ giao diện chung. Khởi động lại Flask sau khi sửa file demo để cập nhật renderer.
 
-Bước cuối ở cả hai chế độ là **Sort theo thứ tự input**. Sort giữ nguyên tập câu đã chọn, chỉ sắp theo chỉ số xuất hiện gốc; nội dung sao chép cũng dùng thứ tự này. Đồ thị demo có màu cụm đậm, tâm dạng sao, khung biểu đồ và chi tiết câu khi hover hoặc focus một điểm.
+Bước cuối ở cả hai chế độ là **Sort theo thứ tự input**. Sort giữ nguyên tập câu đã chọn, chỉ sắp theo chỉ số xuất hiện gốc; nội dung sao chép cũng dùng thứ tự này. Demo giữ các cảnh, đồ thị và màu gốc của `interactive_pipeline_demo.py`; chỉ nối thêm một bước Sort cuối. Phần tích hợp dùng phạm vi CSS riêng để không ảnh hưởng giao diện tóm tắt.
+
+## Đối chiếu số bước demo
+
+Web dùng trực tiếp `flowBuild` trong file demo và chỉ nối thêm 1 bước Sort. Số bước phụ thuộc K, số vòng K-means, ứng viên Centroid và các lượt MMR; không có giới hạn cứng 40/61. Cùng một kết quả pipeline, số bước trên web luôn bằng số bước file gốc + 1. Dòng trạng thái hiển thị rõ số bước gốc và bước Sort.
+
+Nạp mẫu sẽ khôi phục cả văn bản và tham số gốc (hiện K = 6). Renderer và backend cùng đọc phiên bản mới nhất của file demo; tải lại trang sau khi sửa file. Hai chế độ dùng chung màu xanh ngọc của web; màu riêng của các cụm và cảnh báo vẫn giữ ý nghĩa.
